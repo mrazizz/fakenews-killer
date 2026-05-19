@@ -88,7 +88,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: const Color(0xFF000816),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -96,7 +96,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Image.asset('assets/images/logo.png', width: 56, height: 56, errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: Colors.blue, size: 56)),
+              Image.asset('assets/images/logo.png', width: 56, height: 56, errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: Color(0xFF3B82F6), size: 56)),
               const SizedBox(height: 24),
               Text(
                 'Analyzing Claim',
@@ -111,13 +111,33 @@ class _LoadingScreenState extends State<LoadingScreen> {
               Text(
                 'Our AI agents are working...',
                 style: GoogleFonts.inter(
-                  color: const Color(0xFF8A8A9A),
+                  color: const Color(0xFF93C5FD),
                   fontSize: 14,
                 ),
               ),
               const SizedBox(height: 48),
-              for (int i = 0; i < _steps.length; i++)
-                _buildAgentCard(i, _steps[i]),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF000510),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.2)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    for (int i = 0; i < _steps.length; i++)
+                      _buildAgentCard(i, _steps[i]),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -132,29 +152,16 @@ class _LoadingScreenState extends State<LoadingScreen> {
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 500),
       opacity: (isPast || isCurrent) ? 1.0 : 0.3,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: isCurrent ? const Color(0xFF0D1929) : const Color(0xFF13131A),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isPast
-                ? const Color(0xFF2ECC71)
-                : isCurrent
-                    ? const Color(0xFF3B82F6)
-                    : const Color(0xFF1E1E2E),
-            width: isCurrent || isPast ? 2 : 1,
-          ),
-        ),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 12),
         child: Row(
           children: [
             if (isPast)
-              const Icon(Icons.check_circle, color: Color(0xFF2ECC71), size: 24)
+              const Icon(Icons.check, color: Color(0xFF3B82F6), size: 18)
             else if (isCurrent)
               const SizedBox(
-                width: 24,
-                height: 24,
+                width: 14,
+                height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -163,14 +170,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 ),
               )
             else
-              const SizedBox(width: 24, height: 24),
-            const SizedBox(width: 16),
+              const Icon(Icons.chevron_right, color: Colors.white24, size: 18),
+            const SizedBox(width: 12),
             Expanded(
               child: Text(
                 title,
-                style: GoogleFonts.inter(
-                  color: Colors.white,
-                  fontSize: 14,
+                style: GoogleFonts.robotoMono(
+                  color: const Color(0xFF93C5FD),
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
               ),

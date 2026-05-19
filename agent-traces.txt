@@ -617,3 +617,46 @@ The `ExpansionTile` widget was showing its default Material surface color (which
 - Added an enhanced footer branding line ("Verified by fakenewskiller.app") to make the shared image look more polished
 
 **Press `R` in your Dart terminal to hot restart** and all changes will be live.
+--------------------------------------------------
+### Agent Response (Dark Navy Theme)
+
+I have successfully applied the **Premium Dark Navy** theme throughout the entire application. The interface now features a sophisticated "Cyber-Verification" aesthetic with deep blues and cyan accents.
+
+🎨 Updated Color System
+
+Backgrounds: All screens now use 0xFF0D1B2A (Deep Navy).
+Cards & Panels: Elevated surfaces use 0xFF1A2E42 (Medium Navy) with subtle borders.
+Verdict Badges (Vivid Mode):
+🔴 FALSE: 0xFFE53935
+🟢 TRUE: 0xFF43A047
+🟠 MISLEADING: 0xFFFB8C00
+⚪ UNVERIFIED: 0xFF78909C
+Typography:
+Headings: Colors.white (Outfit font)
+Body/Subtitles: 0xFFB0BEC5 (Cool Gray)
+Terminal Log Panel: The loading screen now features a "near black" navy panel (0xFF0A1520) with Cyan Monospace (0xFF4FC3F7) text for a high-tech terminal feel.
+
+--------------------------------------------------
+### Agent Response (BeforeAfterScreen Implementation)
+
+I have fully implemented the `BeforeAfterScreen` adhering to your requests:
+
+✨ What's Included
+1. Seamless Integration: Added a "View System Impact" button right below "View Tracker" on the ResultsScreen.
+2. Dark Theme Consistency: I used the dark navy palette (#0D1B2A backgrounds, #1A2E42 cards) we established earlier so it looks perfectly integrated.
+3. "Before" Panel: Features a mock WhatsApp-style chat bubble containing the original claim text (dynamically pulled from the analysis breakdown) along with a red "Unverified — spreading" warning.
+4. "After" Panel: Displays three distinct action cards for Verdict Generation, Tracker Update, and Platform Report Drafting. These will stack cleanly on mobile screens.
+5. Agent Execution Log: A sleek, terminal-style monospace panel at the bottom (#0A1520 background, #4FC3F7 cyan text). No hardcoded mock data: I've engineered it to generate log lines dynamically based on the actual AnalysisResult object.
+
+--------------------------------------------------
+### Agent Response (Midnight Blue Theme)
+
+I have completely overhauled the app's theme to perfectly match the midnight navy and bright blue aesthetic of your icon! 🌌🛡️
+
+Here is a breakdown of the exact changes applied across every screen:
+1. main.dart: Replaced ThemeData to lock in the 0xFF000816 (Midnight) scaffold background and 0xFF0A1628 (Navy) surface colors. I also explicitly configured TextTheme to ensure global text defaults to white and 0xFF93C5FD (Light Blue).
+2. Cards & Containers: Hunted down every single white/light gray card across all screens and updated them to use 0xFF0A1628 for primary cards and 0xFF0F1F35 for inner/nested containers.
+3. Buttons & Accents: All primary buttons, loading indicators, checkmarks, active borders, and icons now pop with the 0xFF3B82F6 (Bright Blue) color.
+4. Execution Logs: The terminal panels on the loading screen and the Before/After screen now use an ultra-dark 0xFF000510 background with 0xFF93C5FD monospace text and bright blue glowing borders.
+5. Verdict Colors: Reverted and locked the vivid verdict colors (FALSE → #E74C3C, TRUE → #2ECC71, MISLEADING → #F39C12, UNVERIFIED → #8A8A9A).
+

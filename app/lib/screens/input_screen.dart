@@ -53,13 +53,13 @@ class _InputScreenState extends State<InputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: const Color(0xFF000816),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF000816),
         elevation: 0,
         leading: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Image.asset('assets/images/logo.png', width: 32, height: 32, errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: Colors.blue)),
+          child: Image.asset('assets/images/logo.png', width: 32, height: 32, errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: Color(0xFF3B82F6))),
         ),
         title: Text(
           'FakeNews Killer',
@@ -85,7 +85,7 @@ class _InputScreenState extends State<InputScreen> {
                 'Paste any claim, forward, or headline',
                 style: GoogleFonts.inter(
                   fontSize: 14,
-                  color: const Color(0xFF8A8A9A),
+                  color: const Color(0xFF93C5FD),
                 ),
               ),
               const SizedBox(height: 24),
@@ -98,16 +98,16 @@ class _InputScreenState extends State<InputScreen> {
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: 'Type or paste here...',
-                    hintStyle: const TextStyle(color: Color(0xFF8A8A9A)),
+                    hintStyle: TextStyle(color: const Color(0xFF93C5FD).withOpacity(0.6)),
                     filled: true,
-                    fillColor: const Color(0xFF13131A),
+                    fillColor: const Color(0xFF0A1628),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF1E1E2E)),
+                      borderSide: BorderSide(color: const Color(0xFF3B82F6).withOpacity(0.2)),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Color(0xFF1E1E2E)),
+                      borderSide: BorderSide(color: const Color(0xFF3B82F6).withOpacity(0.2)),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -122,9 +122,9 @@ class _InputScreenState extends State<InputScreen> {
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF13131A),
+                    color: const Color(0xFF0F1F35),
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0xFF1E1E2E)),
+                    border: Border.all(color: const Color(0xFF3B82F6).withOpacity(0.2)),
                   ),
                   child: Row(
                     children: [
@@ -139,7 +139,7 @@ class _InputScreenState extends State<InputScreen> {
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close, color: Colors.red),
+                        icon: const Icon(Icons.close, color: Color(0xFFE74C3C)),
                         onPressed: () => setState(() => _selectedImage = null),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
@@ -164,9 +164,7 @@ class _InputScreenState extends State<InputScreen> {
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF3B82F6), Color(0xFF1034A6)],
-                  ),
+                  color: const Color(0xFF3B82F6),
                 ),
                 child: ElevatedButton(
                   onPressed: _checkNow,

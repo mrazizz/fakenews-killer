@@ -8,6 +8,8 @@ import 'package:share_plus/share_plus.dart';
 import '../models/analysis_result.dart';
 import 'package:intl/intl.dart';
 
+// ignore_for_file: deprecated_member_use
+
 class VerdictCardScreen extends StatefulWidget {
   final AnalysisResult result;
 
@@ -84,9 +86,9 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
     final verdictColor = _getVerdictColor(widget.result.verdict);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: const Color(0xFF000816),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF000816),
         elevation: 0,
         title: Text('Verdict Card',
             style: GoogleFonts.outfit(
@@ -121,11 +123,11 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                 key: _cardKey,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color(0xFF0A1628),
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: const [
+                    boxShadow: [
                       BoxShadow(
-                        color: Color(0x442563EB),
+                        color: const Color(0xFF3B82F6).withOpacity(0.2),
                         blurRadius: 24,
                         spreadRadius: 2,
                       ),
@@ -141,35 +143,43 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Row(
-                              children: [
-                                Image.asset(
-                                  'assets/images/logo.png',
-                                  width: 20,
-                                  height: 20,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(Icons.shield,
-                                          color: Colors.blue, size: 20),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'FakeNews Killer',
-                                  style: GoogleFonts.outfit(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                    color: Colors.black87,
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/logo.png',
+                                    width: 20,
+                                    height: 20,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        const Icon(Icons.shield,
+                                            color: Color(0xFF3B82F6), size: 20),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(width: 8),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('FakeNews Killer',
+                                          style: GoogleFonts.outfit(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16)),
+                                      Text('Fact-Check Verification',
+                                          style: GoogleFonts.inter(
+                                              color: const Color(0xFF93C5FD),
+                                              fontSize: 11)),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                             Text(
                               _formatDate(widget.result.timestamp),
                               style: GoogleFonts.inter(
-                                  fontSize: 11, color: Colors.grey.shade500),
+                                  fontSize: 11, color: const Color(0xFF93C5FD)),
                             ),
                           ],
                         ),
-                        const Divider(height: 32),
+                        const Divider(height: 32, color: Colors.white10),
 
                         // Verdict
                         Center(
@@ -212,7 +222,7 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                             Text('Confidence',
                                 style: GoogleFonts.inter(
                                     fontWeight: FontWeight.w600,
-                                    color: Colors.black54)),
+                                    color: Colors.white)),
                             Text('${widget.result.confidenceScore}%',
                                 style: GoogleFonts.inter(
                                     fontWeight: FontWeight.bold,
@@ -224,7 +234,7 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                           borderRadius: BorderRadius.circular(6),
                           child: LinearProgressIndicator(
                             value: widget.result.confidenceScore / 100,
-                            backgroundColor: Colors.grey.shade200,
+                            backgroundColor: Colors.white10,
                             valueColor:
                                 AlwaysStoppedAnimation<Color>(verdictColor),
                             minHeight: 12,
@@ -236,10 +246,10 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
+                            color: Colors.white.withOpacity(0.03),
                             borderRadius: BorderRadius.circular(12),
                             border:
-                                Border.all(color: Colors.grey.shade200),
+                                Border.all(color: Colors.white10),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,14 +264,14 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                                       style: GoogleFonts.inter(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: Colors.black54)),
+                                          color: const Color(0xFF93C5FD))),
                                 ],
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 widget.result.keyFinding,
                                 style: GoogleFonts.inter(
-                                    color: Colors.black87,
+                                    color: Colors.white,
                                     height: 1.5,
                                     fontSize: 15),
                               ),
@@ -276,7 +286,7 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                               style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
-                                  color: Colors.black54)),
+                                  color: const Color(0xFF93C5FD))),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
@@ -287,13 +297,13 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade200,
+                                  color: Colors.white10,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(source,
                                     style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: Colors.black54,
+                                        color: const Color(0xFF93C5FD),
                                         fontWeight: FontWeight.w500)),
                               );
                             }).toList(),
@@ -345,35 +355,32 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 28),
-
-              // ── Share as Image Button (outside card) ──────────────
-              Container(
+              const SizedBox(height: 32),
+              if (!_isCapturing)
+                Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF3B82F6), Color(0xFF1034A6)],
-                  ),
+                  color: const Color(0xFF3B82F6),
                 ),
                 child: ElevatedButton.icon(
-                  onPressed: _isCapturing ? null : _shareScreenshot,
-                  icon: const Icon(Icons.ios_share, color: Colors.white),
-                  label: Text(
-                    _isCapturing ? 'Capturing…' : 'Share as Image',
-                    style: const TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    onPressed: _isCapturing ? null : _shareScreenshot,
+                    icon: const Icon(Icons.ios_share, color: Colors.white),
+                    label: Text(
+                      _isCapturing ? 'Capturing…' : 'Share as Image',
+                      style: const TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                    ),
                   ),
                 ),
-              ),
+              const SizedBox(height: 48),
             ],
           ),
         ),

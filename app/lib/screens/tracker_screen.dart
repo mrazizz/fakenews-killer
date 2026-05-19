@@ -49,9 +49,9 @@ class _TrackerScreenState extends State<TrackerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0F),
+      backgroundColor: const Color(0xFF000816),
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFF000816),
         elevation: 0,
         title: Text('Misinformation Tracker', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
         iconTheme: const IconThemeData(color: Colors.white),
@@ -68,7 +68,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Colors.red, size: 48),
+                    const Icon(Icons.error_outline, color: Color(0xFFE74C3C), size: 48),
                     const SizedBox(height: 16),
                     Text(
                       'Failed to load tracker data',
@@ -78,7 +78,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     Text(
                       snapshot.error.toString(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
+                      style: const TextStyle(color: Color(0xFF93C5FD)),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
@@ -88,13 +88,17 @@ class _TrackerScreenState extends State<TrackerScreen> {
                         });
                       },
                       child: const Text('Retry'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF3B82F6),
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ],
                 ),
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No entries found.', style: TextStyle(color: Colors.white)));
+            return const Center(child: Text('No entries found.', style: TextStyle(color: Color(0xFF93C5FD))));
           }
 
           final entries = snapshot.data!;
@@ -132,12 +136,12 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     final verdictColor = _getVerdictColor(entry.verdict);
                     final riskColor = _getRiskColor(entry.spreadRisk);
 
-                    return Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF13131A),
+                    return Card(
+                      color: const Color(0xFF0A1628),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: verdictColor, width: 2),
-                        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 20, offset: Offset(0,8))],
+                        side: BorderSide(color: verdictColor.withOpacity(0.3), width: 1),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -150,7 +154,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: verdictColor.withOpacity(0.15),
+                                    color: verdictColor.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -165,7 +169,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                 Text(
                                   entry.date,
                                   style: const TextStyle(
-                                    color: Color(0xFF8A8A9A),
+                                    color: Color(0xFF93C5FD),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -187,14 +191,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                   'Spread Risk:',
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: Color(0xFF8A8A9A),
+                                    color: Color(0xFF93C5FD),
                                   ),
                                 ),
                                 const SizedBox(width: 8),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                   decoration: BoxDecoration(
-                                    color: riskColor.withOpacity(0.15),
+                                    color: riskColor.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: Text(
@@ -203,7 +207,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                       color: riskColor,
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
-                                    ),
+                                      ),
                                   ),
                                 ),
                               ],
@@ -223,33 +227,36 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   Widget _buildStatCard(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF13131A),
+    return Card(
+      color: const Color(0xFF0A1628),
+      elevation: 4,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 20, offset: Offset(0,8))],
+        side: BorderSide(color: const Color(0xFF3B82F6).withOpacity(0.2)),
       ),
-      child: Column(
-        children: [
-          Text(
-            value,
-            style: GoogleFonts.outfit(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: color,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: GoogleFonts.outfit(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 12,
-              color: const Color(0xFF8A8A9A),
-              fontWeight: FontWeight.w500,
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12,
+                color: const Color(0xFF93C5FD),
+                fontWeight: FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
