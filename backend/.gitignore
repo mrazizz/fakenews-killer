@@ -1,0 +1,46 @@
+# ─── API Keys & Secrets (CRITICAL) ───
+.env
+.env.*
+.env.local
+.env.production
+*.key
+*.pem
+*.secret
+secrets/
+
+# ─── SQLite Database ───
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+*.db-journal
+
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# ─── IDE / Editor ───
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── OS ───
+Desktop.ini
+ehthumbs.db
+
+# ─── Misc ───
+*.log
+.cache/
+Agent-Traces.md
+Agent-Traces.txt
