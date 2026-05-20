@@ -125,6 +125,8 @@ RESPOND ONLY WITH VALID JSON. NO OTHER TEXT. NO MARKDOWN. EXACT STRUCTURE:
             raise ValueError("Empty JSON object parsed")
         
         tracker_data = result.get("tracker_entry", {})
+        verdict_card_data = result.get("verdict_card", {})
+        confidence = verdict_card_data.get("confidence_percentage", 0)
         
         insert_tracker_entry(
             claim_text=tracker_data.get("claim_text", "Unknown claim"),
@@ -135,6 +137,7 @@ RESPOND ONLY WITH VALID JSON. NO OTHER TEXT. NO MARKDOWN. EXACT STRUCTURE:
             sources_cited=json.dumps(tracker_data.get("sources_cited", [])),
             tags=json.dumps(tracker_data.get("tags", [])),
             status=tracker_data.get("status", "logged"),
+            confidence_score=confidence,
         )
         
         return result

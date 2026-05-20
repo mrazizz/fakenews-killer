@@ -49,9 +49,14 @@ def _create_tables(conn: sqlite3.Connection) -> None:
             first_detected  TEXT    NOT NULL,
             sources_cited   TEXT    NOT NULL DEFAULT '[]',
             tags            TEXT    NOT NULL DEFAULT '[]',
-            status          TEXT    NOT NULL DEFAULT 'active'
+            status          TEXT    NOT NULL DEFAULT 'active',
+            confidence_score INTEGER NOT NULL DEFAULT 0
         )
     """)
+    try:
+        conn.execute("ALTER TABLE tracker ADD COLUMN confidence_score INTEGER NOT NULL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass  # Column already exists
     conn.commit()
 
 
@@ -72,6 +77,7 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
             "sources_cited": json.dumps(["State Bank of Pakistan", "World Bank Data Portal"]),
             "tags": json.dumps(["economy", "gdp", "pakistan", "viral"]),
             "status": "active",
+            "confidence_score": 95,
         },
         {
             "claim_text": "Polio vaccine causes infertility — thousands affected in Sindh province.",
@@ -83,6 +89,7 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
             "sources_cited": json.dumps(["WHO Pakistan", "NIH Islamabad", "Dawn News"]),
             "tags": json.dumps(["health", "polio", "vaccine", "sindh", "misinfo"]),
             "status": "active",
+            "confidence_score": 98,
         },
         {
             "claim_text": "نئی تعلیمی پالیسی میں اردو کو ختم کر دیا گیا ہے۔",
@@ -94,6 +101,7 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
             "sources_cited": json.dumps(["Ministry of Education Pakistan", "Geo News"]),
             "tags": json.dumps(["education", "urdu", "policy", "misleading"]),
             "status": "active",
+            "confidence_score": 75,
         },
     ]
 
@@ -101,12 +109,12 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
         conn.execute(
             """INSERT INTO tracker
                (claim_text, verdict, category, language, spread_risk,
-                first_detected, sources_cited, tags, status)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                first_detected, sources_cited, tags, status, confidence_score)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 entry["claim_text"], entry["verdict"], entry["category"],
                 entry["language"], entry["spread_risk"], entry["first_detected"],
-                entry["sources_cited"], entry["tags"], entry["status"],
+                entry["sources_cited"], entry["tags"], entry["status"], entry["confidence_score"]
             ),
         )
     conn.commit()
@@ -123,6 +131,7 @@ def insert_tracker_entry(
     sources_cited: str = "[]",
     tags: str = "[]",
     status: str = "active",
+    confidence_score: int = 0,
 ) -> dict:
     """Insert a new row into the tracker table and return it as a dict."""
     conn = get_db()
@@ -130,10 +139,10 @@ def insert_tracker_entry(
     cursor = conn.execute(
         """INSERT INTO tracker
            (claim_text, verdict, category, language, spread_risk,
-            first_detected, sources_cited, tags, status)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            first_detected, sources_cited, tags, status, confidence_score)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (claim_text, verdict, category, language, spread_risk,
-         now, sources_cited, tags, status),
+         now, sources_cited, tags, status, confidence_score),
     )
     conn.commit()
     return get_tracker_entry(cursor.lastrowid)

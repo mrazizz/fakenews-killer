@@ -161,6 +161,7 @@ class TrackerEntry(BaseModel):
     sources_cited: str
     tags: str
     status: str
+    confidence_score: int = 0
 
 
 class HealthResponse(BaseModel):
