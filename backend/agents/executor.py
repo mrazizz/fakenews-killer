@@ -138,6 +138,8 @@ RESPOND ONLY WITH VALID JSON. NO OTHER TEXT. NO MARKDOWN. EXACT STRUCTURE:
             tags=json.dumps(tracker_data.get("tags", [])),
             status=tracker_data.get("status", "logged"),
             confidence_score=confidence,
+            analyst_data=analyst_output,
+            executor_data=result,
         )
         
         return result

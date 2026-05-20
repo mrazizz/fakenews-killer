@@ -127,46 +127,38 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                       children: [
                         // Header
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Image.asset(
-                                    'assets/images/logo.png',
-                                    width: 20,
-                                    height: 20,
-                                    errorBuilder:
-                                        (context, error, stackTrace) =>
-                                            const Icon(Icons.shield,
-                                                color: Color(0xFFE5E5E5),
-                                                size: 20),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('FakeNews Killer',
-                                          style: GoogleFonts.outfit(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 16)),
-                                      Text('Fact-Check Verification',
-                                          style: GoogleFonts.inter(
-                                              color:
-                                                  const Color(0xFF8E8E8E),
-                                              fontSize: 11)),
-                                    ],
-                                  ),
-                                ],
-                              ),
+                            Image.asset(
+                              'assets/images/logo.png',
+                              width: 24,
+                              height: 24,
+                              errorBuilder:
+                                  (context, error, stackTrace) =>
+                                      const Icon(Icons.shield,
+                                          color: Color(0xFFE5E5E5),
+                                          size: 24),
                             ),
-                            Text(
-                              _formatDate(widget.result.timestamp),
-                              style: GoogleFonts.inter(
-                                  fontSize: 11,
-                                  color: const Color(0xFF555555)),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('FakeNews Killer',
+                                    style: GoogleFonts.outfit(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16)),
+                                Text('Fact-Check Verification',
+                                    style: GoogleFonts.inter(
+                                        color: const Color(0xFF8E8E8E),
+                                        fontSize: 12)),
+                                const SizedBox(height: 2),
+                                Text(
+                                  _formatDate(widget.result.timestamp),
+                                  style: GoogleFonts.inter(
+                                      fontSize: 11,
+                                      color: const Color(0xFF555555)),
+                                ),
+                              ],
                             ),
                           ],
                         ),

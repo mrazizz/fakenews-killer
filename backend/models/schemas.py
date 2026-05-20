@@ -151,17 +151,19 @@ class AnalyzeResponse(BaseModel):
 
 class TrackerEntry(BaseModel):
     """A single misinformation tracker row (maps 1-to-1 with the SQLite table)."""
-    id: Optional[int] = None
+    id: Optional[str] = None
     claim_text: str
     verdict: str
     category: str
     language: str
     spread_risk: str
-    first_detected: str
-    sources_cited: str
-    tags: str
-    status: str
+    first_detected: Optional[str] = None
+    sources_cited: list[str] = []
+    tags: list[str] = []
+    status: str = "active"
     confidence_score: int = 0
+    analyst_data: Optional[dict] = None
+    executor_data: Optional[dict] = None
 
 
 class HealthResponse(BaseModel):

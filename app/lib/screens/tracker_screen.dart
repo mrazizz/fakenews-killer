@@ -61,20 +61,29 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   void _onEntryTap(TrackerEntry entry) {
-    final result = AnalysisResult(
-      verdict: entry.verdict,
-      confidenceScore: entry.confidenceScore,
-      keyFinding: entry.claimPreview,
-      claimsBreakdown: [
-        ClaimBreakdown(
-          claim: entry.claimPreview,
-          status: entry.verdict,
-          explanation: 'Retrieved from tracker database.',
-        ),
-      ],
-      sourcesAnalyzed: [],
-      timestamp: entry.date,
-    );
+    AnalysisResult result;
+    if (entry.executorData != null) {
+      result = AnalysisResult.fromJson({
+        'executor': entry.executorData,
+        'analyst': entry.analystData,
+        'created_at': entry.date,
+      });
+    } else {
+      result = AnalysisResult(
+        verdict: entry.verdict,
+        confidenceScore: entry.confidenceScore,
+        keyFinding: entry.claimPreview,
+        claimsBreakdown: [
+          ClaimBreakdown(
+            claim: entry.claimPreview,
+            status: entry.verdict,
+            explanation: 'Retrieved from legacy tracker database. Full analysis data was not saved for this entry.',
+          ),
+        ],
+        sourcesAnalyzed: [],
+        timestamp: entry.date,
+      );
+    }
 
     Navigator.push(
       context,
@@ -139,7 +148,13 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     style: TextStyle(color: Color(0xFF8E8E8E))));
           }
 
-          final entries = snapshot.data!;
+          final allEntries = snapshot.data!;
+          final entries = allEntries.where((e) => !e.verdict.toUpperCase().contains('UNVERIFIED')).toList();
+          if (entries.isEmpty) {
+            return const Center(
+                child: Text('No verified entries found.',
+                    style: TextStyle(color: Color(0xFF8E8E8E))));
+          }
           final total = entries.length;
           final falseCount =
               entries.where((e) => e.verdict.toUpperCase() == 'FALSE').length;

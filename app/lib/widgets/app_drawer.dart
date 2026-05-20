@@ -11,13 +11,14 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFF080808),
+      surfaceTintColor: Colors.transparent,
       elevation: 24,
       shadowColor: Colors.black,
       child: Container(
         decoration: const BoxDecoration(
           border: Border(
-            left: BorderSide(color: Color(0xFF333333), width: 1),
+            right: BorderSide(color: Color(0xFF1F1F1F), width: 1),
           ),
         ),
         child: SafeArea(

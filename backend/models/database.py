@@ -103,6 +103,8 @@ def insert_tracker_entry(
     tags: str = "[]",
     status: str = "active",
     confidence_score: int = 0,
+    analyst_data: dict | None = None,
+    executor_data: dict | None = None,
 ) -> dict:
     """Insert a new document into the tracker collection and return it as a dict."""
     client = _get_client()
@@ -118,6 +120,8 @@ def insert_tracker_entry(
         "tags": tags,
         "status": status,
         "confidence_score": confidence_score,
+        "analyst_data": analyst_data,
+        "executor_data": executor_data,
     }
     _, doc_ref = client.collection(COLLECTION).add(entry)
     entry["id"] = doc_ref.id
@@ -131,6 +135,13 @@ def get_tracker_entry(entry_id: str) -> dict | None:
     if doc.exists:
         data = doc.to_dict()
         data["id"] = doc.id
+        for field in ["sources_cited", "tags"]:
+            val = data.get(field)
+            if isinstance(val, str):
+                try:
+                    data[field] = json.loads(val)
+                except Exception:
+                    data[field] = []
         return data
     return None
 
@@ -147,5 +158,15 @@ def get_all_tracker_entries() -> list[dict]:
     for doc in docs:
         data = doc.to_dict()
         data["id"] = doc.id
+        
+        # Parse legacy JSON strings back to lists for Pydantic validation
+        for field in ["sources_cited", "tags"]:
+            val = data.get(field)
+            if isinstance(val, str):
+                try:
+                    data[field] = json.loads(val)
+                except Exception:
+                    data[field] = []
+
         results.append(data)
     return results

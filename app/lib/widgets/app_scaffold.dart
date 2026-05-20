@@ -39,7 +39,8 @@ class _AppScaffoldState extends State<AppScaffold> {
       key: _scaffoldKey,
       backgroundColor: const Color(0xFF000000),
       drawerScrimColor: Colors.black.withOpacity(0.5),
-      endDrawer: AppDrawer(currentRoute: widget.currentRoute),
+      drawerEnableOpenDragGesture: false,
+      drawer: AppDrawer(currentRoute: widget.currentRoute),
       appBar: AppBar(
         backgroundColor: const Color(0xFF000000),
         elevation: 0,
@@ -72,7 +73,7 @@ class _AppScaffoldState extends State<AppScaffold> {
           if (widget.extraActions != null) ...widget.extraActions!,
           IconButton(
             icon: const Icon(Icons.menu, color: Colors.white, size: 26),
-            onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
             tooltip: 'Menu',
           ),
           const SizedBox(width: 4),

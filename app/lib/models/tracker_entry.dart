@@ -5,6 +5,8 @@ class TrackerEntry {
   final String spreadRisk;
   final String date;
   final int confidenceScore;
+  final Map<String, dynamic>? analystData;
+  final Map<String, dynamic>? executorData;
 
   TrackerEntry({
     required this.id,
@@ -13,6 +15,8 @@ class TrackerEntry {
     required this.spreadRisk,
     required this.date,
     required this.confidenceScore,
+    this.analystData,
+    this.executorData,
   });
 
   factory TrackerEntry.fromJson(Map<String, dynamic> json) {
@@ -26,6 +30,8 @@ class TrackerEntry {
       spreadRisk: json['spread_risk'] ?? 'UNKNOWN',
       date: json['first_detected'] ?? '',
       confidenceScore: json['confidence_score'] ?? 0,
+      analystData: json['analyst_data'] as Map<String, dynamic>?,
+      executorData: json['executor_data'] as Map<String, dynamic>?,
     );
   }
 }

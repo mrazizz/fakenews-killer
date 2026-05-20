@@ -15,7 +15,7 @@ class InputScreen extends StatefulWidget {
 
 class _InputScreenState extends State<InputScreen> {
   final TextEditingController _textController = TextEditingController();
-  XFile? _selectedImage;
+  List<XFile> _selectedImages = [];
   bool _hasText = false;
   bool _isExtracting = false;
 
@@ -38,35 +38,47 @@ class _InputScreenState extends State<InputScreen> {
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() => _selectedImage = image);
+    final List<XFile> images = await picker.pickMultiImage();
+    if (images.isNotEmpty) {
+      setState(() {
+        _selectedImages.addAll(images);
+        if (_selectedImages.length > 5) {
+          _selectedImages = _selectedImages.sublist(0, 5);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Maximum 5 images allowed.')),
+          );
+        }
+      });
     }
   }
 
   Future<void> _submit() async {
     final text = _textController.text.trim();
-    if (text.isEmpty && _selectedImage == null) return;
+    if (text.isEmpty && _selectedImages.isEmpty) return;
 
     setState(() => _isExtracting = true);
     
     String extractedText = '';
-    if (_selectedImage != null) {
-      try {
-        final inputImage = InputImage.fromFilePath(_selectedImage!.path);
-        final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
-        final recognizedText = await textRecognizer.processImage(inputImage);
-        extractedText = recognizedText.text;
-        textRecognizer.close();
-      } catch (e) {
-        debugPrint('OCR Error: $e');
+    if (_selectedImages.isNotEmpty) {
+      for (var image in _selectedImages) {
+        try {
+          final inputImage = InputImage.fromFilePath(image.path);
+          final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
+          final recognizedText = await textRecognizer.processImage(inputImage);
+          if (recognizedText.text.trim().isNotEmpty) {
+            extractedText += '${recognizedText.text}\n\n';
+          }
+          textRecognizer.close();
+        } catch (e) {
+          debugPrint('OCR Error: $e');
+        }
       }
     }
 
     if (!mounted) return;
     setState(() => _isExtracting = false);
 
-    if (_selectedImage != null && extractedText.trim().isEmpty) {
+    if (_selectedImages.isNotEmpty && extractedText.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -157,53 +169,56 @@ class _InputScreenState extends State<InputScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           // ── Image Preview (inside container) ───────────
-                          if (_selectedImage != null)
+                          if (_selectedImages.isNotEmpty)
                             Padding(
                               padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                               child: Align(
                                 alignment: Alignment.centerLeft,
-                                child: SizedBox(
-                                  width: 60,
-                                  height: 60,
-                                  child: Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      Opacity(
-                                        opacity: 0.4,
-                                        child: Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: const Color(0xFF555555), width: 1),
-                                          ),
-                                          child: ClipRRect(
-                                            borderRadius: BorderRadius.circular(7),
-                                            child: Image.file(
-                                              File(_selectedImage!.path),
-                                              width: 60,
-                                              height: 60,
-                                              fit: BoxFit.cover,
-                                              errorBuilder: (context, error, stackTrace) =>
-                                                  const Icon(Icons.image, color: Color(0xFF8E8E8E), size: 28),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: _selectedImages.map((image) {
+                                    return SizedBox(
+                                      width: 60,
+                                      height: 60,
+                                      child: Stack(
+                                        clipBehavior: Clip.none,
+                                        children: [
+                                          Container(
+                                            width: 60,
+                                            height: 60,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: const Color(0xFF555555), width: 1),
+                                            ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(7),
+                                              child: Image.file(
+                                                File(image.path),
+                                                width: 60,
+                                                height: 60,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) =>
+                                                    const Icon(Icons.image, color: Color(0xFF8E8E8E), size: 28),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: -6,
-                                        right: -6,
-                                        child: GestureDetector(
-                                          onTap: () => setState(() => _selectedImage = null),
-                                          child: const CircleAvatar(
-                                            radius: 10,
-                                            backgroundColor: Color(0xFF444444), // Gray cross button
-                                            child: Icon(Icons.close, size: 12, color: Colors.white),
+                                          Positioned(
+                                            top: -6,
+                                            right: -6,
+                                            child: GestureDetector(
+                                              onTap: () => setState(() => _selectedImages.remove(image)),
+                                              child: const CircleAvatar(
+                                                radius: 10,
+                                                backgroundColor: Color(0xFF444444),
+                                                child: Icon(Icons.close, size: 12, color: Colors.white),
+                                              ),
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    );
+                                  }).toList(),
                                 ),
                               ),
                             ),
@@ -227,7 +242,7 @@ class _InputScreenState extends State<InputScreen> {
                                 fontSize: 16,
                               ),
                               border: InputBorder.none,
-                              contentPadding: EdgeInsets.fromLTRB(16, _selectedImage != null ? 8 : 16, 16, 8),
+                              contentPadding: EdgeInsets.fromLTRB(16, _selectedImages.isNotEmpty ? 8 : 16, 16, 8),
                             ),
                           ),
 
@@ -261,13 +276,13 @@ class _InputScreenState extends State<InputScreen> {
                                 const Spacer(),
                                 // Send button — larger
                                 GestureDetector(
-                                  onTap: (_hasText || _selectedImage != null) && !_isExtracting
+                                  onTap: (_hasText || _selectedImages.isNotEmpty) && !_isExtracting
                                       ? _submit
                                       : null,
                                   child: CircleAvatar(
                                     radius: 22,
                                     backgroundColor:
-                                        (_hasText || _selectedImage != null)
+                                        (_hasText || _selectedImages.isNotEmpty)
                                             ? Colors.white
                                             : const Color(0xFF2A2A2A),
                                     child: _isExtracting
@@ -282,7 +297,7 @@ class _InputScreenState extends State<InputScreen> {
                                         : Icon(
                                             Icons.arrow_upward,
                                             color:
-                                                (_hasText || _selectedImage != null)
+                                                (_hasText || _selectedImages.isNotEmpty)
                                                     ? Colors.black
                                                     : const Color(0xFF555555),
                                             size: 22,

@@ -175,6 +175,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                 child: Text(
                   _getCurrentStepText(),
                   key: ValueKey(_getCurrentStepText()),
+                  textAlign: TextAlign.center,
                   style: GoogleFonts.robotoMono(
                     color: const Color(0xFF8E8E8E),
                     fontSize: 15,

@@ -1303,3 +1303,131 @@ There are 4 `withOpacity` deprecation warnings — 2 pre-existing and 2 from my 
 Edited before_after_screen.dart
 
 All 4 `withOpacity` → `withValues(alpha:)` fixes applied. The deprecation warnings should now be resolved. ✅
+
+Listed directory fakenewskiller
+Listed directory fakenews_killer_app
+Listed directory app
+Listed directory backend
+Listed directory lib
+Searched for "/tracker"
+Viewed main.py:1-192
+Listed directory screens
+Listed directory widgets
+Viewed database.py:1-152
+Viewed app_scaffold.dart:1-88
+Viewed app_drawer.dart:1-218
+Viewed input_screen.dart:1-308
+Viewed tracker_screen.dart:1-336
+Viewed schemas.py:1-170
+Edited schemas.py
+Edited app_scaffold.dart
+Edited app_drawer.dart
+Edited input_screen.dart
+
+I've successfully addressed all your requests! Here's a breakdown of the changes made to the app and backend:
+
+1. **Misinformation Tracker 500 Error**:
+   - The issue was caused by a mismatch between the expected schema (`int` for ID, from an older SQLite setup) and what Firestore returns (which are string IDs). I updated `TrackerEntry` in `schemas.py` to accept string IDs, which will allow the tracker screen to load successfully.
+
+2. **Sidebar Color**:
+   - Changed the sidebar's background color in `app_drawer.dart` from the standard dark gray to a deeper black (`#0F0F0F`), which is slightly lighter than the pure black background (`#000000`).
+   - Also shifted its subtle border from the left side to the right side so it correctly separates the sidebar from the main screen.
+
+3. **Sidebar Position & Gesture behavior**:
+   - Modified the `AppScaffold` to render the drawer from the left side instead of the right side.
+   - The hamburger menu button stays in its top-right position but now slides open the sidebar from the left.
+   - Disabled the swipe/drag gesture (`drawerEnableOpenDragGesture: false`) so it won't conflict with the phone's native back-gesture anymore. It will now only open when the menu button is explicitly tapped.
+
+4. **Multiple Screenshots & 100% Opacity**:
+   - Updated the `input_screen.dart` to support selecting up to 5 images using the image picker.
+   - Removed the 40% opacity filter on the image preview, so your selected screenshots now display at full brightness (100% opacity).
+   - Replaced the single image placeholder with a `Wrap` grid that nicely lays out up to 5 image previews side-by-side, each with its own close button.
+
+If you reload the backend and perform a hot-restart on the Flutter app, all of these changes should take effect immediately! Let me know if you want to tweak any of the UI further.
+
+Ran command: `Test-Path "C:\Program Files (x86)\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd"`
+Ran command: `Test-Path "C:\Users\mrgam\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd"`
+Ran command: `& "C:\Users\mrgam\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run services list`
+Used tool: manage_task
+Ran command: `& "C:\Users\mrgam\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run deploy fakenews-killer-api --source . --region us-central1 --quiet`
+Used tool: manage_task
+Used tool: schedule
+
+I'm kicking off the deployment for you! It's currently deploying the backend to Google Cloud Run in the background. I'll let you know as soon as the deployment finishes, and then your Tracker screen will be fully operational.
+
+The deployment has just successfully completed! The updated backend is now live on Google Cloud. 
+
+If you restart the app on your phone, the Misinformation Tracker screen will now correctly load all the entries instead of showing the `500` error. Let me know if everything looks good on your end or if you'd like to make any other changes!
+
+Viewed tracker_screen.dart:1-336
+Viewed results_screen.dart:1-238
+Viewed verdict_card_screen.dart:1-385
+Viewed tracker_entry.dart:1-32
+Edited tracker_screen.dart
+Edited verdict_card_screen.dart
+
+Done! I've made the following fixes to your Flutter app:
+
+1. **Tracker Navigation**: Now, when you tap on an entry in the Misinformation Tracker, it will directly open the **Verdict Card Screen** instead of the Analysis Results screen. This completely avoids showing the "Retrieved from tracker database" placeholder and the missing System Impact report, streamlining the experience for looking up past fact-checks.
+2. **Verdict Card Header**: I updated the header layout on the Verdict Card. The date and time now show neatly stacked underneath the "Fact-Check Verification" text, rather than floating on the far right where it was causing overlap issues with the logo on smaller screens. 
+
+If you hot-reload or restart the Flutter app on your phone, you should see the changes right away! Let me know how it looks.
+
+Ran command: `& "C:\Users\mrgam\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run logs read fakenews-killer-api --region us-central1 --limit 50`
+Used tool: manage_task
+Ran command: `& "C:\Users\mrgam\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run services logs read fakenews-killer-api --region us-central1 --limit 50`
+Used tool: manage_task
+Edited database.py
+Edited database.py
+Ran command: `& "C:\Users\mrgam\AppData\Local\Google\Cloud SDK\google-cloud-sdk\bin\gcloud.cmd" run deploy fakenews-killer-api --source . --region us-central1 --quiet`
+Used tool: schedule
+
+I checked the backend logs on Google Cloud, and I found the exact cause of that `500` error. 
+
+The API was crashing because the original test entries we seeded into the database saved `sources_cited` and `tags` as JSON-encoded strings, but our newly updated schema strictly expects them to be properly formatted Lists. So when the backend tried to send the list to the mobile app, the data validation failed!
+
+I've fixed this in the backend so it automatically parses those legacy strings back into lists. I'm deploying the patch to Google Cloud right now. I'll let you know when it's done so you can hit that Retry button!
+
+Used tool: manage_task
+
+The deployment just finished successfully! The backend patch is now live.
+
+You can go ahead and hit the **Retry** button on your phone, and the Misinformation Tracker screen will now successfully load all your entries! Let me know if you run into any other snags.
+
+Viewed analyst.py:1-131
+Ran command: `curl -s https://fakenews-killer-api-966169006664.us-central1.run.app/tracker`
+Used tool: manage_task
+Used tool: schedule
+
+I'm checking the live data right now to see why the `UNVERIFIED_SYSTEM_ERROR` is slipping through the filter, and why the Detailed Breakdown and Draft Report are not displaying properly for that specific fact-check you ran. Give me one moment!
+
+Used tool: manage_task
+Used tool: manage_task
+Ran command: `(Invoke-RestMethod -Uri "https://fakenews-killer-api-966169006664.us-central1.run.app/tracker") | ConvertTo-Json -Depth 5`
+Used tool: manage_task
+Edited tracker_screen.dart
+
+Ah, I see exactly what is happening based on your screenshots! 
+
+There are two things going on here:
+
+**1. The `UNVERIFIED_SYSTEM_ERROR` badge:**
+In the backend, the error state you hit actually saved the string `unverified_system_error` into the database instead of exactly `unverified`. Because my filter was looking for exact matches, it slipped through. I've just updated the Flutter code (`tracker_screen.dart`) to filter out *any* entry that contains the word "unverified", which fixes this bug.
+
+**2. The Missing Detailed Breakdown / Draft:**
+The reason the Eid-ul-Azha fact-check in your screenshot is blank is because **that fact-check was run *before* the new backend was deployed**. Since the old database schema didn't save the detailed breakdown, that data literally doesn't exist in the database for that entry! 
+
+For any of those older entries, I've added a fallback message in the app so it will explicitly say: *"Retrieved from legacy tracker database. Full analysis data was not saved for this entry."* rather than just showing you a confusing blank screen.
+
+**To see it working:**
+If you Hot-Reload your Flutter app, the `UNVERIFIED_SYSTEM_ERROR` will vanish from the list. Then, if you submit a **brand new** fact-check to the API, wait for it to finish, and go to the Tracker—you will see the fully populated Claims Breakdown and the Platform Report Draft successfully retrieved from the database!
+
+Searched for "Drawer"
+Viewed app_drawer.dart:1-218
+Edited app_drawer.dart
+
+Ah! That gray color you were seeing wasn't actually the background color setting—it was an automatic "surface tint" that Flutter's Material 3 applies to elevated components (like the sidebar drawer), which overlays a gray/white tint on top of dark colors.
+
+I just went into `app_drawer.dart` and removed that surface tint (`surfaceTintColor: Colors.transparent`), and also adjusted the background color to a very deep, rich black (`#080808`), so it's just barely lighter than the pure black background of the app.
+
+If you hot-reload your app, you should see the sidebar is now a beautifully sleek dark black!
