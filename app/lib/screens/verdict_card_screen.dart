@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import '../models/analysis_result.dart';
+import '../widgets/app_scaffold.dart';
 import 'package:intl/intl.dart';
 
 // ignore_for_file: deprecated_member_use
@@ -26,20 +27,20 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
   Color _getVerdictColor(String verdict) {
     switch (verdict.toUpperCase()) {
       case 'TRUE':
-        return const Color(0xFF2ECC71);
+        return const Color(0xFF22C55E);
       case 'FALSE':
-        return const Color(0xFFE74C3C);
+        return const Color(0xFFFF4444);
       case 'MISLEADING':
-        return const Color(0xFFF39C12);
+        return const Color(0xFFF59E0B);
       default:
-        return const Color(0xFF8A8A9A);
+        return const Color(0xFF6B7280);
     }
   }
 
   String _formatDate(String timestamp) {
     try {
       final date = DateTime.parse(timestamp);
-      return DateFormat('MMM dd, yyyy • hh:mm a').format(date);
+      return DateFormat('MMM dd, yyyy \u2022 hh:mm a').format(date);
     } catch (e) {
       return timestamp;
     }
@@ -48,7 +49,6 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
   Future<void> _shareScreenshot() async {
     setState(() => _isCapturing = true);
     try {
-      // Capture the card widget as an image
       final RenderRepaintBoundary boundary = _cardKey.currentContext!
           .findRenderObject()! as RenderRepaintBoundary;
       final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
@@ -56,15 +56,14 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
           await image.toByteData(format: ui.ImageByteFormat.png);
       final pngBytes = byteData!.buffer.asUint8List();
 
-      // Save to a temp file
       final tempDir = await getTemporaryDirectory();
       final file = File('${tempDir.path}/verdict_card.png');
       await file.writeAsBytes(pngBytes);
 
-      // Share as image
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'image/png')],
-        subject: 'FakeNews Killer Verdict: ${widget.result.verdict.toUpperCase()}',
+        subject:
+            'FakeNews Killer Verdict: ${widget.result.verdict.toUpperCase()}',
       );
     } catch (e) {
       if (mounted) {
@@ -72,7 +71,7 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
           SnackBar(
             content: Text('Could not capture card: $e',
                 style: GoogleFonts.inter(color: Colors.white)),
-            backgroundColor: const Color(0xFF13131A),
+            backgroundColor: const Color(0xFF1C1C1C),
           ),
         );
       }
@@ -85,34 +84,27 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
   Widget build(BuildContext context) {
     final verdictColor = _getVerdictColor(widget.result.verdict);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF000816),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF000816),
-        elevation: 0,
-        title: Text('Verdict Card',
-            style: GoogleFonts.outfit(
-                color: Colors.white, fontWeight: FontWeight.bold)),
-        iconTheme: const IconThemeData(color: Colors.white),
-        actions: [
-          _isCapturing
-              ? const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(
-                    child: SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white)),
-                  ),
-                )
-              : IconButton(
-                  icon: const Icon(Icons.ios_share, color: Colors.white),
-                  onPressed: _shareScreenshot,
-                  tooltip: 'Share as Image',
+    return AppScaffold(
+      title: 'Verdict Card',
+      currentRoute: '',
+      extraActions: [
+        _isCapturing
+            ? const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Center(
+                  child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white)),
                 ),
-        ],
-      ),
+              )
+            : IconButton(
+                icon: const Icon(Icons.ios_share, color: Colors.white),
+                onPressed: _shareScreenshot,
+                tooltip: 'Share as Image',
+              ),
+      ],
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -123,15 +115,9 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                 key: _cardKey,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0A1628),
+                    color: const Color(0xFF1C1C1C),
                     borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF3B82F6).withOpacity(0.2),
-                        blurRadius: 24,
-                        spreadRadius: 2,
-                      ),
-                    ],
+                    border: Border.all(color: const Color(0xFF2A2A2A)),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
@@ -150,13 +136,16 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                                     'assets/images/logo.png',
                                     width: 20,
                                     height: 20,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.shield,
-                                            color: Color(0xFF3B82F6), size: 20),
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(Icons.shield,
+                                                color: Color(0xFFE5E5E5),
+                                                size: 20),
                                   ),
                                   const SizedBox(width: 8),
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text('FakeNews Killer',
                                           style: GoogleFonts.outfit(
@@ -165,7 +154,8 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                                               fontSize: 16)),
                                       Text('Fact-Check Verification',
                                           style: GoogleFonts.inter(
-                                              color: const Color(0xFF93C5FD),
+                                              color:
+                                                  const Color(0xFF8E8E8E),
                                               fontSize: 11)),
                                     ],
                                   ),
@@ -175,11 +165,13 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                             Text(
                               _formatDate(widget.result.timestamp),
                               style: GoogleFonts.inter(
-                                  fontSize: 11, color: const Color(0xFF93C5FD)),
+                                  fontSize: 11,
+                                  color: const Color(0xFF555555)),
                             ),
                           ],
                         ),
-                        const Divider(height: 32, color: Colors.white10),
+                        const Divider(
+                            height: 32, color: Color(0xFF2A2A2A)),
 
                         // Verdict
                         Center(
@@ -201,8 +193,8 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                             decoration: BoxDecoration(
                               color: verdictColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
-                              border:
-                                  Border.all(color: verdictColor, width: 1),
+                              border: Border.all(
+                                  color: verdictColor, width: 1),
                             ),
                             child: Text(
                               'AI Fact Checked',
@@ -235,8 +227,8 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                           child: LinearProgressIndicator(
                             value: widget.result.confidenceScore / 100,
                             backgroundColor: Colors.white10,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(verdictColor),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                verdictColor),
                             minHeight: 12,
                           ),
                         ),
@@ -246,10 +238,8 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                         Container(
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.03),
+                            color: const Color(0xFF2A2A2A),
                             borderRadius: BorderRadius.circular(12),
-                            border:
-                                Border.all(color: Colors.white10),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,14 +247,14 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                               Row(
                                 children: [
                                   Icon(Icons.search,
-                                      size: 14,
-                                      color: verdictColor),
+                                      size: 14, color: verdictColor),
                                   const SizedBox(width: 6),
                                   Text('Key Finding',
                                       style: GoogleFonts.inter(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 13,
-                                          color: const Color(0xFF93C5FD))),
+                                          color:
+                                              const Color(0xFF8E8E8E))),
                                 ],
                               ),
                               const SizedBox(height: 8),
@@ -286,24 +276,24 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                               style: GoogleFonts.inter(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 13,
-                                  color: const Color(0xFF93C5FD))),
+                                  color: const Color(0xFF8E8E8E))),
                           const SizedBox(height: 8),
                           Wrap(
                             spacing: 8,
                             runSpacing: 6,
-                            children:
-                                widget.result.sourcesAnalyzed.map((source) {
+                            children: widget.result.sourcesAnalyzed
+                                .map((source) {
                               return Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white10,
+                                  color: const Color(0xFF2A2A2A),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(source,
                                     style: GoogleFonts.inter(
                                         fontSize: 12,
-                                        color: const Color(0xFF93C5FD),
+                                        color: const Color(0xFF8E8E8E),
                                         fontWeight: FontWeight.w500)),
                               );
                             }).toList(),
@@ -317,8 +307,8 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFF3CD),
                             borderRadius: BorderRadius.circular(8),
-                            border:
-                                Border.all(color: const Color(0xFFFFEEBA)),
+                            border: Border.all(
+                                color: const Color(0xFFFFEEBA)),
                           ),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,7 +336,7 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
                             'Verified by fakenewskiller.app',
                             style: GoogleFonts.inter(
                                 fontSize: 11,
-                                color: Colors.grey.shade400,
+                                color: const Color(0xFF555555),
                                 letterSpacing: 0.5),
                           ),
                         ),
@@ -358,18 +348,19 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
               const SizedBox(height: 32),
               if (!_isCapturing)
                 Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFF3B82F6),
-                ),
-                child: ElevatedButton.icon(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white,
+                  ),
+                  child: ElevatedButton.icon(
                     onPressed: _isCapturing ? null : _shareScreenshot,
-                    icon: const Icon(Icons.ios_share, color: Colors.white),
-                    label: Text(
-                      _isCapturing ? 'Capturing…' : 'Share as Image',
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold),
+                    icon: const Icon(Icons.ios_share, color: Colors.black),
+                    label: const Text(
+                      'Share as Image',
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold),
                     ),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.transparent,

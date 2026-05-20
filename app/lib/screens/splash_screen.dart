@@ -8,7 +8,7 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF000816),
+      backgroundColor: const Color(0xFF000000),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 48.0),
@@ -20,7 +20,8 @@ class SplashScreen extends StatelessWidget {
                 'assets/images/logo.png',
                 width: 120,
                 height: 120,
-                errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, size: 120, color: Color(0xFF3B82F6)),
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.shield, size: 120, color: Color(0xFFE5E5E5)),
               ),
               const SizedBox(height: 32),
               Text(
@@ -37,7 +38,7 @@ class SplashScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 16,
-                  color: const Color(0xFF93C5FD),
+                  color: const Color(0xFF8E8E8E),
                 ),
               ),
               const Spacer(),
@@ -45,14 +46,7 @@ class SplashScreen extends StatelessWidget {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  color: const Color(0xFF3B82F6),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF3B82F6).withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+                  color: Colors.white,
                 ),
                 child: ElevatedButton(
                   onPressed: () {
@@ -71,7 +65,10 @@ class SplashScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Get Started',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
                   ),
                 ),
               ),

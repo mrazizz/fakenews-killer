@@ -660,3 +660,403 @@ Here is a breakdown of the exact changes applied across every screen:
 4. Execution Logs: The terminal panels on the loading screen and the Before/After screen now use an ultra-dark 0xFF000510 background with 0xFF93C5FD monospace text and bright blue glowing borders.
 5. Verdict Colors: Reverted and locked the vivid verdict colors (FALSE → #E74C3C, TRUE → #2ECC71, MISLEADING → #F39C12, UNVERIFIED → #8A8A9A).
 
+I'll start by researching the existing codebase to understand the current structure before creating a plan. Let me explore the project in parallel.
+
+Listed directory fakenewskiller
+Invoked subagent
+Listed directory fakenews_killer_app
+Listed directory backend
+Listed directory app
+Listed directory lib
+Listed directory assets
+Listed directory screens
+Listed directory models
+Listed directory services
+Listed directory images
+
+Good, now let me read all the key files in parallel.
+
+Viewed main.dart:1-61
+Viewed input_screen.dart:1-196
+Viewed loading_screen.dart:1-191
+Viewed before_after_screen.dart:1-259
+Viewed tracker_screen.dart:1-264
+Viewed verdict_card_screen.dart:1-391
+Viewed analysis_result.dart:1-56
+Viewed tracker_entry.dart:1-29
+Viewed api_service.dart:1-55
+Viewed results_screen.dart:1-268
+Viewed splash_screen.dart:1-86
+Viewed main.py:1-134
+
+Now let me check the backend agents and models for full context:
+
+Listed directory agents
+Listed directory models
+Viewed pubspec.yaml:1-101
+
+Now let me read the backend schemas to understand the response format for SSE:
+
+Viewed schemas.py:1-169
+
+I now have a thorough understanding of the entire codebase. Let me kill the subagents since I've gathered all the info I need, then create the implementation plan.
+
+Used tool: manage_subagents
+
+Now I have complete understanding of the codebase. Let me create the implementation plan.
+
+Edited implementation_plan.md
+
+I've created the implementation plan. Here's a quick summary of what it covers:
+
+**10 files** will be changed (2 new, 8 modified) across both Flutter frontend and FastAPI backend:
+
+1. **Home Screen** → Claude-style chat interface with watermark logo, bottom-pinned expandable input bar with `+`/send buttons
+2. **Sidebar Drawer** → New reusable `AppDrawer` + `AppScaffold` widgets (right-side endDrawer, dark navy, with nav items)
+3. **Tracker Tappable Verdicts** → Each tracker entry card becomes tappable → opens VerdictCardScreen
+4. **SSE Loading Screen** → New `POST /analyze/stream` backend endpoint emitting per-agent SSE events; Flutter listens and updates checkmarks in real time
+5. **Before/After Enhancement** → WhatsApp bubble, staggered slide+fade animations, terminal-style log with blinking cursor, "View Verdict Card" button
+6. **Global Menu Icon** → All screens use `AppScaffold` to get the hamburger icon in top-right on every screen
+
+Please review the plan — especially the **two open questions** about Tracker→Verdict data mapping and image upload wiring. Let me know if you want any changes before I start implementing!
+
+The plan is approved. Let me start executing. I'll create the task tracker first, then begin implementing in parallel.
+
+Used tool: ask_permission
+Edited task.md
+
+Now let me start building. I'll create the foundational shared widgets first, then fan out the rest to subagents.
+
+Edited app_drawer.dart
+Edited app_scaffold.dart
+
+Foundation widgets are done. Now let me dispatch subagents for the larger screen rewrites while I handle the backend + API service + simpler screen migrations:
+
+Used tool: define_subagent
+Invoked subagent
+
+Good, subagents are working on the 3 big screen files. Meanwhile, I'll handle the backend SSE endpoint, API service, tracker screen, results screen, and verdict card screen:
+
+Edited api_service.dart
+Edited main.py
+
+Now add the SSE endpoint:
+
+Edited main.py
+
+Two subagents are done (input screen and loading screen). Now let me modify the tracker screen and remaining screens while waiting for the before/after subagent:
+
+Edited tracker_screen.dart
+
+All 3 subagents are done. Now let me migrate the results screen and verdict card screen to AppScaffold:
+
+Edited results_screen.dart
+Edited verdict_card_screen.dart
+
+All files are written. Let me clean up subagents and run `flutter analyze` to verify:
+
+Used tool: manage_subagents
+Ran command: `flutter analyze`
+Used tool: schedule
+
+While we wait for `flutter analyze`, let me update the task tracker with progress so far:
+
+Edited task.md
+
+Waiting for `flutter analyze` to complete...
+
+Used tool: manage_task
+
+Still running. I'll wait for the notification.
+
+Used tool: manage_task
+
+The analysis is still running. Let me wait for the automatic notification.
+
+Used tool: manage_task
+
+I'll stop polling and wait for the result notification.
+
+Used tool: manage_task
+
+Let me set a timer and wait properly.
+
+Used tool: schedule
+Used tool: manage_task
+
+The analysis is still running (large project). I'll stop polling and wait for the automatic completion notification.
+
+Viewed task-78.log
+
+Still analyzing. Let me wait with a longer timer:
+
+Used tool: schedule
+Used tool: manage_task
+
+Still running. I'll wait for the task completion notification now - stopping tool calls.
+
+Used tool: manage_task
+
+I'll wait for the automatic notification when flutter analyze finishes.
+
+Used tool: manage_task
+
+The flutter analyze is still compiling (this is typical for first-time analysis on a project with many dependencies). I'll wait for the timer to fire.
+
+Viewed task-78.log:1-43
+
+Good news — the analysis completed. The issues are mostly clean:
+
+- **1 error**: `test/widget_test.dart` references `MyApp` which was renamed to `FakeNewsKillerApp` — this is a pre-existing test file issue
+- **3 warnings**: `_getVerdictColor` unused in before_after_screen, `_apiService` unused in input_screen, `_errorMessage` unused in loading_screen — these need fixing
+- **34 infos**: `withOpacity` deprecation — cosmetic, not blocking
+
+Let me fix the actual warnings:
+
+Viewed input_screen.dart:14-20
+Viewed loading_screen.dart:18-28
+Viewed before_after_screen.dart:96-112
+
+I see the issues. Let me also check if `_apiService` is truly unused in input_screen (it should be removed since LoadingScreen now handles the API call itself), and check if `_getVerdictColor` is genuinely unused in before_after_screen. Let me also check the `_errorMessage` field in loading_screen. Let me fix all 3 warnings:
+
+Edited input_screen.dart
+
+Now check if the import is also unused:
+
+Searched for "ApiService"
+Edited input_screen.dart
+
+Now fix the loading_screen unused `_errorMessage`:
+
+Edited loading_screen.dart
+
+Now fix the unused `_getVerdictColor` in before_after_screen. Let me check if it's truly unused or just the analyzer being strict:
+
+Searched for "_getVerdictColor"
+
+It's defined but never called. It's safe to remove:
+
+Edited before_after_screen.dart
+
+Now fix the test file error:
+
+Viewed widget_test.dart:1-31
+
+This is the default Flutter test stub. Let me fix it:
+
+Edited widget_test.dart
+
+Now let me re-run `flutter analyze` to confirm all warnings/errors are resolved:
+
+Ran command: `flutter analyze 2>&1`
+Used tool: schedule
+Viewed task-132.log
+
+Still running (second analysis also takes time). Let me wait for the completion notification.
+
+Viewed task-132.log
+
+Still analyzing. Let me wait for the timer or task completion notification.
+
+Viewed task-132.log
+
+I'll stop checking and wait for the automatic completion notification from the task.
+
+Viewed task-132.log
+
+Let me just wait for the notification now.
+
+Viewed task-132.log
+
+While waiting, let me prepare the walkthrough document since all code changes are done:
+
+Viewed task-132.log:1-46
+
+Good progress. Down from 38 to 35 issues. Only **1 error** remains: `Undefined name '_errorMessage'` at loading_screen.dart:103. This is because I removed the field but there's still a reference to it. Let me fix that:
+
+Viewed loading_screen.dart:95-110
+Edited loading_screen.dart
+
+Now let me run the final analyze:
+
+Ran command: `flutter analyze --no-fatal-infos 2>&1`
+Used tool: schedule
+Viewed task-154.log
+
+Still analyzing (takes ~25s based on last run). Waiting for notification...
+
+Viewed task-154.log
+Viewed task-154.log:1-45
+
+**Zero errors, zero warnings!** All 34 remaining issues are just `info`-level `deprecated_member_use` for `withOpacity` (a Flutter 3.18+ deprecation that's cosmetic and non-blocking — the existing codebase had the same).
+
+Now let me create the walkthrough:
+
+Edited walkthrough.md
+
+Update the task tracker as complete:
+
+Edited task.md
+
+All done! Here's a summary of everything implemented:
+
+## ✅ Implementation Complete — 10 Files Changed
+
+### New Files (2)
+- [app_drawer.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/widgets/app_drawer.dart) — Right-side drawer with nav items, active highlighting, Settings placeholder
+- [app_scaffold.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/widgets/app_scaffold.dart) — Shared scaffold giving every screen the menu icon (top-right)
+
+### Modified Files (8)
+| File | Key Change |
+|------|-----------|
+| [input_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/input_screen.dart) | Claude-style: watermark logo, bottom floating input bar with `+`/send |
+| [loading_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/loading_screen.dart) | SSE-synced: agent steps tick when real backend events arrive |
+| [before_after_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/before_after_screen.dart) | WhatsApp bubble, staggered card animations, terminal log with blinking cursor |
+| [tracker_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/tracker_screen.dart) | Tappable entries → VerdictCardScreen |
+| [results_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/results_screen.dart) | AppScaffold migration for global menu |
+| [verdict_card_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/verdict_card_screen.dart) | AppScaffold migration for global menu |
+| [api_service.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/services/api_service.dart) | New `analyzeStream()` SSE client method |
+| [main.py](file:///c:/Users/mrgam/fakenewskiller/backend/main.py) | New `POST /analyze/stream` SSE endpoint |
+
+### Verification
+- **`flutter analyze`: 0 errors, 0 warnings** ✅ (34 infos are just `withOpacity` deprecation — cosmetic, matches existing codebase)
+
+To test the app, run `flutter run` in the `app/` directory and start the backend with `uvicorn main:app --reload` in the `backend/` directory.
+
+These are targeted UI fixes — no plan needed. Let me read the current state of the files and apply the changes.
+
+Viewed input_screen.dart:1-275
+Viewed app_drawer.dart:1-225
+
+I have full context now. Let me apply all 4 fixes in one rewrite of input_screen.dart, plus change the drawer background color.
+
+Edited input_screen.dart
+
+Now fix the drawer background color:
+
+Edited app_drawer.dart
+
+All 4 fixes applied. Quick verify:
+
+Ran command: `flutter analyze --no-fatal-infos 2>&1`
+Used tool: schedule
+Viewed task-182.log
+Viewed task-182.log:1-42
+
+**0 errors, 0 warnings** ✅ — only 31 `info`-level `withOpacity` deprecations (cosmetic).
+
+All 4 fixes applied cleanly:
+
+| Fix | What changed |
+|-----|-------------|
+| **1. Background logo** | Now `260×260`, `opacity: 0.06`, `BoxFit.contain`, no wrapper Container — just `Opacity` → `Image.asset` inside `Center` |
+| **2. Color matching** | Input bar → `Color(0xFF000816)`, Drawer → `Color(0xFF000816)` — exact match with scaffold |
+| **3. Two-row layout** | TextField on top (grows upward, `maxLines: null`), thin divider, then buttons row below: "Add Screenshot" `TextButton.icon` on left, `CircleAvatar(radius: 18)` send button on right |
+| **4. Image preview** | 60×60 `ClipRRect` thumbnail with `Positioned(top: -4, right: -4)` red `CircleAvatar(radius: 10)` X button |
+
+This is a systematic color theme replacement across all files. No plan needed — I'll rewrite every file with the Grok palette. Let me batch the work: I'll write the smaller files directly and dispatch subagents for the larger screen files.
+
+Edited main.dart
+Edited app_scaffold.dart
+Edited app_drawer.dart
+Edited input_screen.dart
+
+Now let me read and rewrite splash_screen, then dispatch subagents for the 5 remaining large screens:
+
+Viewed splash_screen.dart:1-86
+Edited splash_screen.dart
+
+Now let me read the remaining 5 screen files and dispatch subagents to rewrite them all in parallel:
+
+Viewed loading_screen.dart:1-262
+
+Now let me dispatch subagents for all 5 remaining screens in parallel:
+
+Invoked subagent
+
+Quota limits on subagents. Let me kill them and write all files directly myself:
+
+Used tool: manage_subagents
+
+I'll write all 5 remaining files directly. Let me start:
+
+Edited loading_screen.dart
+Edited results_screen.dart
+Edited tracker_screen.dart
+Edited verdict_card_screen.dart
+
+Last file — before_after_screen. Let me read the current version first:
+
+Viewed before_after_screen.dart:1-482
+Edited before_after_screen.dart
+
+All 10 files rewritten. Let me verify there are no remaining blue references and run flutter analyze:
+
+Searched for "0xFF3B82F6"
+Searched for "0xFF93C5FD"
+
+Zero blue references left. Now verify:
+
+Ran command: `flutter analyze --no-fatal-infos 2>&1`
+Used tool: schedule
+
+Waiting for analysis to complete...
+
+Used tool: manage_task
+
+Still running. I'll wait for the automatic notification.
+
+The log file hasn't been created yet. Let me wait for the task completion notification.
+
+Used tool: schedule
+Used tool: manage_task
+
+Still analyzing. Let me set a final timer and wait for it.
+
+Used tool: schedule
+Viewed task-235.log
+Viewed task-235.log
+
+Analysis still running — it's processing all the rewrites. Let me wait for the automatic notification.
+
+Used tool: schedule
+Viewed task-235.log
+
+Hmm, the log file still only shows "Analyzing app...". The task may be stuck. Let me check its status:
+
+Used tool: manage_task
+
+It's been running for ~3 min (last progress 55s ago which is just the carriage return animation). Flutter analyze can be slow after major rewrites because it re-analyzes from scratch. Let me wait for the completion notification.
+
+Used tool: schedule
+Viewed task-235.log
+
+The analyze spinner is still going. It hasn't finished writing output yet — the `\r` cursor redraw is still happening. This is normal for a full fresh analysis. Let me wait for the task completion notification properly.
+
+Viewed task-235.log:1-12
+
+Let me wait for the full output including the summary line:
+
+Viewed task-235.log:1-19
+
+**0 errors, 0 warnings!** ✅ Only 8 `info`-level `withOpacity` deprecations remain (down from 34 before).
+
+## ✅ Complete — Grok Theme Applied to 10 Files
+
+| File | Key Change |
+|------|-----------|
+| [main.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/main.dart) | `ThemeData` with pure black scaffold, white primary, 1C1C1C surface, 2A2A2A dividers |
+| [app_scaffold.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/widgets/app_scaffold.dart) | Pure black AppBar + scaffold |
+| [app_drawer.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/widgets/app_drawer.dart) | `0xFF000000` drawer bg, `0xFF2A2A2A` active item pill, grey nav text |
+| [input_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/input_screen.dart) | `1C1C1C` input bar, `2A2A2A` border, white/black send button, 4% white ghost logo |
+| [splash_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/splash_screen.dart) | Black bg, white "Get Started" button with black text |
+| [loading_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/loading_screen.dart) | `0A0A0A` terminal, `E5E5E5` spinner, `22C55E` checkmarks |
+| [results_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/results_screen.dart) | White primary button, `2A2A2A` outlined secondary buttons, `1C1C1C` cards |
+| [tracker_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/tracker_screen.dart) | `E5E5E5` stat accent, `1C1C1C` cards, `555555` muted text |
+| [verdict_card_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/verdict_card_screen.dart) | `1C1C1C` card, `2A2A2A` nested sections, white share button |
+| [before_after_screen.dart](file:///c:/Users/mrgam/fakenewskiller/app/lib/screens/before_after_screen.dart) | `0A0A0A` terminal log, `E5E5E5` text, white action button, WhatsApp greens preserved |
+
+### Verification
+- **`flutter analyze`: 0 errors, 0 warnings** ✅ (8 infos = `withOpacity` deprecation)
+- **`grep 0xFF3B82F6`: 0 matches** — all blue purged
+- **`grep 0xFF93C5FD`: 0 matches** — all light blue purged

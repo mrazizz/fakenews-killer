@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/tracker_entry.dart';
+import '../models/analysis_result.dart';
 import '../services/api_service.dart';
+import '../widgets/app_scaffold.dart';
+import 'verdict_card_screen.dart';
 
 class TrackerScreen extends StatefulWidget {
   const TrackerScreen({super.key});
@@ -23,44 +26,64 @@ class _TrackerScreenState extends State<TrackerScreen> {
   Color _getVerdictColor(String verdict) {
     switch (verdict.toUpperCase()) {
       case 'TRUE':
-        return const Color(0xFF2ECC71);
+        return const Color(0xFF22C55E);
       case 'FALSE':
-        return const Color(0xFFE74C3C);
+        return const Color(0xFFFF4444);
       case 'MISLEADING':
-        return const Color(0xFFF39C12);
+        return const Color(0xFFF59E0B);
       default:
-        return const Color(0xFF8A8A9A);
+        return const Color(0xFF6B7280);
     }
   }
 
   Color _getRiskColor(String risk) {
     switch (risk.toUpperCase()) {
       case 'HIGH':
-        return const Color(0xFFE74C3C);
+        return const Color(0xFFFF4444);
       case 'MEDIUM':
-        return const Color(0xFFF39C12);
+        return const Color(0xFFF59E0B);
       case 'LOW':
-        return const Color(0xFF2ECC71);
+        return const Color(0xFF22C55E);
       default:
-        return const Color(0xFF8A8A9A);
+        return const Color(0xFF6B7280);
     }
+  }
+
+  void _onEntryTap(TrackerEntry entry) {
+    final result = AnalysisResult(
+      verdict: entry.verdict,
+      confidenceScore: 0,
+      keyFinding: entry.claimPreview,
+      claimsBreakdown: [
+        ClaimBreakdown(
+          claim: entry.claimPreview,
+          status: entry.verdict,
+          explanation: '',
+        ),
+      ],
+      sourcesAnalyzed: [],
+      timestamp: entry.date,
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => VerdictCardScreen(result: result),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF000816),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF000816),
-        elevation: 0,
-        title: Text('Misinformation Tracker', style: GoogleFonts.outfit(color: Colors.white, fontWeight: FontWeight.bold)),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
+    return AppScaffold(
+      title: 'Misinformation Tracker',
+      currentRoute: 'tracker',
       body: FutureBuilder<List<TrackerEntry>>(
         future: _trackerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF3B82F6)));
+            return const Center(
+                child: CircularProgressIndicator(color: Color(0xFFE5E5E5)));
           } else if (snapshot.hasError) {
             return Center(
               child: Padding(
@@ -68,17 +91,19 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline, color: Color(0xFFE74C3C), size: 48),
+                    const Icon(Icons.error_outline,
+                        color: Color(0xFFFF4444), size: 48),
                     const SizedBox(height: 16),
                     Text(
                       'Failed to load tracker data',
-                      style: GoogleFonts.outfit(fontSize: 20, color: Colors.white),
+                      style:
+                          GoogleFonts.outfit(fontSize: 20, color: Colors.white),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       snapshot.error.toString(),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Color(0xFF93C5FD)),
+                      style: const TextStyle(color: Color(0xFF8E8E8E)),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
@@ -87,27 +112,35 @@ class _TrackerScreenState extends State<TrackerScreen> {
                           _trackerFuture = _apiService.fetchTrackerEntries();
                         });
                       },
-                      child: const Text('Retry'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3B82F6),
+                        backgroundColor: const Color(0xFF2A2A2A),
                         foregroundColor: Colors.white,
                       ),
+                      child: const Text('Retry'),
                     ),
                   ],
                 ),
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No entries found.', style: TextStyle(color: Color(0xFF93C5FD))));
+            return const Center(
+                child: Text('No entries found.',
+                    style: TextStyle(color: Color(0xFF8E8E8E))));
           }
 
           final entries = snapshot.data!;
           final total = entries.length;
-          final falseCount = entries.where((e) => e.verdict.toUpperCase() == 'FALSE').length;
-          final misleadingCount = entries.where((e) => e.verdict.toUpperCase() == 'MISLEADING').length;
-
-          final percentFalse = total > 0 ? (falseCount / total * 100).toStringAsFixed(1) : '0';
-          final percentMisleading = total > 0 ? (misleadingCount / total * 100).toStringAsFixed(1) : '0';
+          final falseCount =
+              entries.where((e) => e.verdict.toUpperCase() == 'FALSE').length;
+          final misleadingCount = entries
+              .where((e) => e.verdict.toUpperCase() == 'MISLEADING')
+              .length;
+          final percentFalse = total > 0
+              ? (falseCount / total * 100).toStringAsFixed(1)
+              : '0';
+          final percentMisleading = total > 0
+              ? (misleadingCount / total * 100).toStringAsFixed(1)
+              : '0';
 
           return Column(
             children: [
@@ -116,11 +149,17 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    Expanded(child: _buildStatCard('Total', total.toString(), const Color(0xFF3B82F6))),
+                    Expanded(
+                        child: _buildStatCard(
+                            'Total', total.toString(), const Color(0xFFE5E5E5))),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildStatCard('False', '$percentFalse%', const Color(0xFFE74C3C))),
+                    Expanded(
+                        child: _buildStatCard(
+                            'False', '$percentFalse%', const Color(0xFFFF4444))),
                     const SizedBox(width: 8),
-                    Expanded(child: _buildStatCard('Misleading', '$percentMisleading%', const Color(0xFFF39C12))),
+                    Expanded(
+                        child: _buildStatCard('Misleading',
+                            '$percentMisleading%', const Color(0xFFF59E0B))),
                   ],
                 ),
               ),
@@ -128,7 +167,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
               // List
               Expanded(
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: entries.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (context, index) {
@@ -136,83 +176,104 @@ class _TrackerScreenState extends State<TrackerScreen> {
                     final verdictColor = _getVerdictColor(entry.verdict);
                     final riskColor = _getRiskColor(entry.spreadRisk);
 
-                    return Card(
-                      color: const Color(0xFF0A1628),
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: verdictColor.withOpacity(0.3), width: 1),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: verdictColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(4),
+                    return InkWell(
+                      onTap: () => _onEntryTap(entry),
+                      borderRadius: BorderRadius.circular(12),
+                      splashColor: Colors.white.withOpacity(0.05),
+                      child: Card(
+                        color: const Color(0xFF1C1C1C),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: const BorderSide(
+                              color: Color(0xFF2A2A2A), width: 1),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: verdictColor.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      entry.verdict.toUpperCase(),
+                                      style: TextStyle(
+                                        color: verdictColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                      ),
+                                    ),
                                   ),
-                                  child: Text(
-                                    entry.verdict.toUpperCase(),
-                                    style: TextStyle(
-                                      color: verdictColor,
-                                      fontWeight: FontWeight.bold,
+                                  Text(
+                                    entry.date,
+                                    style: const TextStyle(
+                                      color: Color(0xFF555555),
                                       fontSize: 12,
                                     ),
                                   ),
-                                ),
-                                Text(
-                                  entry.date,
-                                  style: const TextStyle(
-                                    color: Color(0xFF93C5FD),
-                                    fontSize: 12,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              entry.claimPreview,
-                              style: GoogleFonts.inter(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w500,
-                                fontSize: 15,
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                const Text(
-                                  'Spread Risk:',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF93C5FD),
-                                  ),
+                              const SizedBox(height: 12),
+                              Text(
+                                entry.claimPreview,
+                                style: GoogleFonts.inter(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 15,
                                 ),
-                                const SizedBox(width: 8),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                  decoration: BoxDecoration(
-                                    color: riskColor.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Text(
-                                    entry.spreadRisk.toUpperCase(),
-                                    style: TextStyle(
-                                      color: riskColor,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Text(
+                                        'Spread Risk:',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF8E8E8E),
+                                        ),
                                       ),
+                                      const SizedBox(width: 8),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: riskColor.withOpacity(0.12),
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                        child: Text(
+                                          entry.spreadRisk.toUpperCase(),
+                                          style: TextStyle(
+                                            color: riskColor,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                              ],
-                            ),
-                          ],
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: Color(0xFF555555),
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );
@@ -228,11 +289,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   Widget _buildStatCard(String label, String value, Color color) {
     return Card(
-      color: const Color(0xFF0A1628),
-      elevation: 4,
+      color: const Color(0xFF1C1C1C),
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: const Color(0xFF3B82F6).withOpacity(0.2)),
+        side: const BorderSide(color: Color(0xFF2A2A2A)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -251,7 +312,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
               label,
               style: GoogleFonts.inter(
                 fontSize: 12,
-                color: const Color(0xFF93C5FD),
+                color: const Color(0xFF8E8E8E),
                 fontWeight: FontWeight.w500,
               ),
             ),

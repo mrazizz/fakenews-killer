@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/analysis_result.dart';
+import '../widgets/app_scaffold.dart';
 import 'verdict_card_screen.dart';
 import 'tracker_screen.dart';
 import 'before_after_screen.dart';
@@ -13,13 +14,13 @@ class ResultsScreen extends StatelessWidget {
   Color _getVerdictColor(String verdict) {
     switch (verdict.toUpperCase()) {
       case 'TRUE':
-        return const Color(0xFF2ECC71);
+        return const Color(0xFF22C55E);
       case 'FALSE':
-        return const Color(0xFFE74C3C);
+        return const Color(0xFFFF4444);
       case 'MISLEADING':
-        return const Color(0xFFF39C12);
+        return const Color(0xFFF59E0B);
       default:
-        return const Color(0xFF8A8A9A);
+        return const Color(0xFF6B7280);
     }
   }
 
@@ -27,20 +28,12 @@ class ResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final verdictColor = _getVerdictColor(result.verdict);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFF000816),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF000816),
-        elevation: 0,
-        title: Text('Analysis Results',
-            style: GoogleFonts.outfit(
-                color: Colors.white, fontWeight: FontWeight.bold)),
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      // ── Fixed bottom action buttons ──────────────────────────────
+    return AppScaffold(
+      title: 'Analysis Results',
+      currentRoute: '',
       bottomNavigationBar: SafeArea(
         child: Container(
-          color: const Color(0xFF000816),
+          color: const Color(0xFF000000),
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -49,7 +42,7 @@ class ResultsScreen extends StatelessWidget {
                 width: double.infinity,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
-                  color: const Color(0xFF3B82F6),
+                  color: Colors.white,
                 ),
                 child: ElevatedButton.icon(
                   onPressed: () => Navigator.push(
@@ -58,10 +51,10 @@ class ResultsScreen extends StatelessWidget {
                       builder: (context) => VerdictCardScreen(result: result),
                     ),
                   ),
-                  icon: const Icon(Icons.credit_card, color: Colors.white),
+                  icon: const Icon(Icons.credit_card, color: Colors.black),
                   label: const Text('See Verdict Card',
                       style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.bold)),
+                          color: Colors.black, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
@@ -80,13 +73,13 @@ class ResultsScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => const TrackerScreen()),
                   ),
-                  icon: const Icon(Icons.list_alt, color: Color(0xFF3B82F6)),
+                  icon: const Icon(Icons.list_alt, color: Color(0xFFE5E5E5)),
                   label: const Text('View Tracker',
                       style: TextStyle(
-                          color: Color(0xFF3B82F6), fontWeight: FontWeight.bold)),
+                          color: Color(0xFFE5E5E5), fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(color: Color(0xFF3B82F6)),
+                    side: const BorderSide(color: Color(0xFF2A2A2A)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -101,13 +94,13 @@ class ResultsScreen extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (context) => BeforeAfterScreen(result: result)),
                   ),
-                  icon: const Icon(Icons.compare_arrows, color: Color(0xFF3B82F6)),
+                  icon: const Icon(Icons.compare_arrows, color: Color(0xFFE5E5E5)),
                   label: const Text('View System Impact',
                       style: TextStyle(
-                          color: Color(0xFF3B82F6), fontWeight: FontWeight.bold)),
+                          color: Color(0xFFE5E5E5), fontWeight: FontWeight.bold)),
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(color: Color(0xFF3B82F6)),
+                    side: const BorderSide(color: Color(0xFF2A2A2A)),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12)),
                   ),
@@ -127,15 +120,9 @@ class ResultsScreen extends StatelessWidget {
               padding:
                   const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
               decoration: BoxDecoration(
-                color: verdictColor.withOpacity(0.12),
+                color: verdictColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: verdictColor, width: 2),
-                boxShadow: [
-                  BoxShadow(
-                      color: verdictColor.withOpacity(0.2),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5))
-                ],
               ),
               child: Column(
                 children: [
@@ -185,11 +172,11 @@ class ResultsScreen extends StatelessWidget {
                     color: Colors.white)),
             const SizedBox(height: 8),
             Card(
-              color: const Color(0xFF0A1628),
-              elevation: 4,
+              color: const Color(0xFF1C1C1C),
+              elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: const Color(0xFF3B82F6).withOpacity(0.2)),
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFF2A2A2A)),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -209,8 +196,8 @@ class ResultsScreen extends StatelessWidget {
             ...result.claimsBreakdown.map((claim) {
               final claimColor = _getVerdictColor(claim.status);
               return Card(
-                color: const Color(0xFF0A1628),
-                elevation: 4,
+                color: const Color(0xFF1C1C1C),
+                elevation: 0,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -222,12 +209,12 @@ class ResultsScreen extends StatelessWidget {
                     data: Theme.of(context).copyWith(
                       dividerColor: Colors.transparent,
                       colorScheme: Theme.of(context).colorScheme.copyWith(
-                            surface: const Color(0xFF0A1628),
+                            surface: const Color(0xFF1C1C1C),
                           ),
                     ),
                     child: ExpansionTile(
-                      backgroundColor: const Color(0xFF0A1628),
-                      collapsedBackgroundColor: const Color(0xFF0A1628),
+                      backgroundColor: const Color(0xFF1C1C1C),
+                      collapsedBackgroundColor: const Color(0xFF1C1C1C),
                       iconColor: Colors.white,
                       collapsedIconColor: Colors.white,
                       leading: Icon(Icons.circle, color: claimColor, size: 14),
@@ -246,10 +233,10 @@ class ResultsScreen extends StatelessWidget {
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          color: const Color(0xFF0A1628),
+                          color: const Color(0xFF1C1C1C),
                           child: Text(claim.explanation,
                               style: GoogleFonts.inter(
-                                  color: const Color(0xFF93C5FD),
+                                  color: const Color(0xFF8E8E8E),
                                   height: 1.5)),
                         ),
                       ],

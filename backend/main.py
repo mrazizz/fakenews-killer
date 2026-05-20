@@ -20,8 +20,10 @@ ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+import json as json_module
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 
 from models.schemas import (
@@ -102,6 +104,62 @@ async def analyze(payload: AnalyzeRequest):
 
     except Exception as exc:
         raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.post("/analyze/stream")
+async def analyze_stream(payload: AnalyzeRequest):
+    """
+    SSE streaming version of the analysis pipeline.
+
+    Emits one Server-Sent Event per agent completion:
+        data: {"agent": "reader",     "status": "complete"}
+        data: {"agent": "analyst",    "status": "complete"}
+        data: {"agent": "strategist", "status": "complete"}
+        data: {"agent": "executor",   "status": "complete"}
+        data: {"agent": "pipeline",   "status": "complete", "result": {...}}
+
+    On error:
+        data: {"agent": "pipeline",   "status": "error", "error": "..."}
+    """
+    async def event_generator():
+        try:
+            # Stage 1 — Reader
+            reader_out = await run_reader(payload.text)
+            yield f"data: {json_module.dumps({'agent': 'reader', 'status': 'complete'})}\n\n"
+
+            # Stage 2 — Analyst
+            analyst_out = await run_analyst(reader_out)
+            yield f"data: {json_module.dumps({'agent': 'analyst', 'status': 'complete'})}\n\n"
+
+            # Stage 3 — Strategist
+            strategist_out = await run_strategist(analyst_out)
+            yield f"data: {json_module.dumps({'agent': 'strategist', 'status': 'complete'})}\n\n"
+
+            # Stage 4 — Executor
+            executor_out = await run_executor(strategist_out, analyst_out, reader_out)
+            yield f"data: {json_module.dumps({'agent': 'executor', 'status': 'complete'})}\n\n"
+
+            # Final — full result
+            result = AnalyzeResponse(
+                reader=reader_out,
+                analyst=analyst_out,
+                strategist=strategist_out,
+                executor=executor_out,
+            )
+            yield f"data: {json_module.dumps({'agent': 'pipeline', 'status': 'complete', 'result': result.model_dump()})}\n\n"
+
+        except Exception as exc:
+            yield f"data: {json_module.dumps({'agent': 'pipeline', 'status': 'error', 'error': str(exc)})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.get("/tracker", response_model=list[TrackerEntry])
