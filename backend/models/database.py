@@ -1,69 +1,51 @@
 """
-SQLite persistence layer for FakeNews Killer.
-Creates the TrackerEntry table and seeds it with 3 example rows on first run.
+Firestore persistence layer for FakeNews Killer.
+Stores TrackerEntry documents in the 'tracker' collection.
+Seeds with 3 example entries on first run.
 """
 
-import sqlite3
 import json
-from pathlib import Path
 from datetime import datetime, timezone
+from google.cloud import firestore
 
-DB_DIR = Path(__file__).resolve().parent.parent / "data"
-DB_PATH = DB_DIR / "fakenews_killer.db"
+# ── Module-level Firestore client (lazy-init) ──
+_db: firestore.Client | None = None
+_initialised: bool = False
 
-
-def _get_connection() -> sqlite3.Connection:
-    """Return a module-level connection (created once, reused)."""
-    DB_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(DB_PATH), check_same_thread=False)
-    conn.row_factory = sqlite3.Row
-    return conn
+COLLECTION = "tracker"
 
 
-# Module-level connection
-_conn: sqlite3.Connection | None = None
+def _get_client() -> firestore.Client:
+    """Return a shared Firestore client (created once, reused)."""
+    global _db
+    if _db is None:
+        _db = firestore.Client()
+    return _db
 
 
-def get_db() -> sqlite3.Connection:
-    """Lazy-initialise and return the shared DB connection."""
-    global _conn
-    if _conn is None:
-        _conn = _get_connection()
-        _create_tables(_conn)
-        _seed_if_empty(_conn)
-    return _conn
+def get_db():
+    """Lazy-initialise Firestore and seed if empty.
+
+    This is called at app startup from main.py — keeps the same interface
+    as the old SQLite version so nothing else needs to change.
+    """
+    global _initialised
+    client = _get_client()
+    if not _initialised:
+        _seed_if_empty(client)
+        _initialised = True
+    return client
 
 
-# ──────────────────────── Schema & Seed ────────────────────────
+# ──────────────────────── Seed ────────────────────────
 
-def _create_tables(conn: sqlite3.Connection) -> None:
-    """Create the TrackerEntry table if it doesn't exist yet."""
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS tracker (
-            id              INTEGER PRIMARY KEY AUTOINCREMENT,
-            claim_text      TEXT    NOT NULL,
-            verdict         TEXT    NOT NULL,
-            category        TEXT    NOT NULL,
-            language        TEXT    NOT NULL DEFAULT 'en',
-            spread_risk     TEXT    NOT NULL DEFAULT 'low',
-            first_detected  TEXT    NOT NULL,
-            sources_cited   TEXT    NOT NULL DEFAULT '[]',
-            tags            TEXT    NOT NULL DEFAULT '[]',
-            status          TEXT    NOT NULL DEFAULT 'active',
-            confidence_score INTEGER NOT NULL DEFAULT 0
-        )
-    """)
-    try:
-        conn.execute("ALTER TABLE tracker ADD COLUMN confidence_score INTEGER NOT NULL DEFAULT 0")
-    except sqlite3.OperationalError:
-        pass  # Column already exists
-    conn.commit()
-
-
-def _seed_if_empty(conn: sqlite3.Connection) -> None:
+def _seed_if_empty(client: firestore.Client) -> None:
     """Insert 3 example tracker entries so the dashboard isn't blank on first boot."""
-    count = conn.execute("SELECT COUNT(*) FROM tracker").fetchone()[0]
-    if count > 0:
+    coll = client.collection(COLLECTION)
+
+    # Quick check: if any document exists, skip seeding
+    existing = coll.limit(1).get()
+    if len(existing) > 0:
         return
 
     seeds = [
@@ -92,7 +74,7 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
             "confidence_score": 98,
         },
         {
-            "claim_text": "نئی تعلیمی پالیسی میں اردو کو ختم کر دیا گیا ہے۔",
+            "claim_text": "\u0646\u0626\u06cc \u062a\u0639\u0644\u06cc\u0645\u06cc \u067e\u0627\u0644\u06cc\u0633\u06cc \u0645\u06cc\u06ba \u0627\u0631\u062f\u0648 \u06a9\u0648 \u062e\u062a\u0645 \u06a9\u0631 \u062f\u06cc\u0627 \u06af\u06cc\u0627 \u06c1\u06d2\u06d4",
             "verdict": "misleading",
             "category": "political",
             "language": "ur",
@@ -106,18 +88,7 @@ def _seed_if_empty(conn: sqlite3.Connection) -> None:
     ]
 
     for entry in seeds:
-        conn.execute(
-            """INSERT INTO tracker
-               (claim_text, verdict, category, language, spread_risk,
-                first_detected, sources_cited, tags, status, confidence_score)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-            (
-                entry["claim_text"], entry["verdict"], entry["category"],
-                entry["language"], entry["spread_risk"], entry["first_detected"],
-                entry["sources_cited"], entry["tags"], entry["status"], entry["confidence_score"]
-            ),
-        )
-    conn.commit()
+        coll.add(entry)
 
 
 # ──────────────────────── CRUD helpers ────────────────────────
@@ -133,32 +104,48 @@ def insert_tracker_entry(
     status: str = "active",
     confidence_score: int = 0,
 ) -> dict:
-    """Insert a new row into the tracker table and return it as a dict."""
-    conn = get_db()
+    """Insert a new document into the tracker collection and return it as a dict."""
+    client = _get_client()
     now = datetime.now(timezone.utc).isoformat()
-    cursor = conn.execute(
-        """INSERT INTO tracker
-           (claim_text, verdict, category, language, spread_risk,
-            first_detected, sources_cited, tags, status, confidence_score)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (claim_text, verdict, category, language, spread_risk,
-         now, sources_cited, tags, status, confidence_score),
-    )
-    conn.commit()
-    return get_tracker_entry(cursor.lastrowid)
+    entry = {
+        "claim_text": claim_text,
+        "verdict": verdict,
+        "category": category,
+        "language": language,
+        "spread_risk": spread_risk,
+        "first_detected": now,
+        "sources_cited": sources_cited,
+        "tags": tags,
+        "status": status,
+        "confidence_score": confidence_score,
+    }
+    _, doc_ref = client.collection(COLLECTION).add(entry)
+    entry["id"] = doc_ref.id
+    return entry
 
 
-def get_tracker_entry(entry_id: int) -> dict | None:
-    """Fetch a single tracker row by ID."""
-    conn = get_db()
-    row = conn.execute("SELECT * FROM tracker WHERE id = ?", (entry_id,)).fetchone()
-    return dict(row) if row else None
+def get_tracker_entry(entry_id: str) -> dict | None:
+    """Fetch a single tracker document by ID."""
+    client = _get_client()
+    doc = client.collection(COLLECTION).document(entry_id).get()
+    if doc.exists:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        return data
+    return None
 
 
 def get_all_tracker_entries() -> list[dict]:
-    """Return every tracker row, newest first."""
-    conn = get_db()
-    rows = conn.execute(
-        "SELECT * FROM tracker ORDER BY first_detected DESC"
-    ).fetchall()
-    return [dict(r) for r in rows]
+    """Return every tracker document, newest first."""
+    client = _get_client()
+    docs = (
+        client.collection(COLLECTION)
+        .order_by("first_detected", direction=firestore.Query.DESCENDING)
+        .stream()
+    )
+    results = []
+    for doc in docs:
+        data = doc.to_dict()
+        data["id"] = doc.id
+        results.append(data)
+    return results
