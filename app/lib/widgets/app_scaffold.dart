@@ -38,6 +38,7 @@ class _AppScaffoldState extends State<AppScaffold> {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: const Color(0xFF000000),
+      drawerScrimColor: Colors.black.withOpacity(0.5),
       endDrawer: AppDrawer(currentRoute: widget.currentRoute),
       appBar: AppBar(
         backgroundColor: const Color(0xFF000000),

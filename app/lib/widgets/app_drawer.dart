@@ -11,8 +11,16 @@ class AppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: const Color(0xFF000000),
-      child: SafeArea(
+      backgroundColor: const Color(0xFF1A1A1A),
+      elevation: 24,
+      shadowColor: Colors.black,
+      child: Container(
+        decoration: const BoxDecoration(
+          border: Border(
+            left: BorderSide(color: Color(0xFF333333), width: 1),
+          ),
+        ),
+        child: SafeArea(
         child: Column(
           children: [
             // ── Header ──────────────────────────────────────────────
@@ -143,6 +151,7 @@ class AppDrawer extends StatelessWidget {
             const SizedBox(height: 24),
           ],
         ),
+      ),
       ),
     );
   }

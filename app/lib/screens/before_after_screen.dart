@@ -234,10 +234,10 @@ class _BeforeAfterScreenState extends State<BeforeAfterScreen>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 14, vertical: 10),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFF4444).withOpacity(0.12),
+                      color: const Color(0xFFFF4444).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: const Color(0xFFFF4444).withOpacity(0.4),
+                        color: const Color(0xFFFF4444).withValues(alpha: 0.4),
                       ),
                     ),
                     child: Row(
@@ -316,8 +316,13 @@ class _BeforeAfterScreenState extends State<BeforeAfterScreen>
                         icon: Icons.flag,
                         iconColor: const Color(0xFFF59E0B),
                         title: 'Report drafted for platform submission',
-                        subtitle: 'Target: Multiple Platforms',
-                        trailing: 'Ready to submit',
+                        subtitle: widget.result.platformReport != null
+                            ? 'Target: ${widget.result.platformReport!.platform}'
+                            : 'Report generation failed \u2014 retry analysis',
+                        trailing: widget.result.platformReport?.harmCategory ?? 'Ready to submit',
+                        onTap: widget.result.platformReport != null
+                            ? () => _showPlatformReportSheet(context, widget.result.platformReport!)
+                            : null,
                       ),
                     ],
                   );
@@ -429,51 +434,223 @@ class _BeforeAfterScreenState extends State<BeforeAfterScreen>
     required String title,
     required String subtitle,
     required String trailing,
+    VoidCallback? onTap,
   }) {
     return Transform.translate(
       offset: Offset(0, _cardSlideAnimations[index].value),
       child: Opacity(
         opacity: _cardFadeAnimations[index].value,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: const Color(0xFF2A2A2A),
-            borderRadius: BorderRadius.circular(12),
-            border: const Border(
-              left: BorderSide(color: Color(0xFF22C55E), width: 4),
-            ),
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(icon, color: iconColor, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14)),
-                    const SizedBox(height: 4),
-                    Text(subtitle,
-                        style: GoogleFonts.inter(
-                            color: const Color(0xFF8E8E8E), fontSize: 12)),
-                    const SizedBox(height: 4),
-                    Text(trailing,
-                        style: GoogleFonts.inter(
-                            color: const Color(0xFF555555),
-                            fontSize: 10,
-                            fontStyle: FontStyle.italic)),
-                  ],
-                ),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A2A2A),
+              borderRadius: BorderRadius.circular(12),
+              border: const Border(
+                left: BorderSide(color: Color(0xFF22C55E), width: 4),
               ),
-            ],
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(icon, color: iconColor, size: 24),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14)),
+                      const SizedBox(height: 4),
+                      Text(subtitle,
+                          style: GoogleFonts.inter(
+                              color: const Color(0xFF8E8E8E), fontSize: 12)),
+                      const SizedBox(height: 4),
+                      Text(trailing,
+                          style: GoogleFonts.inter(
+                              color: const Color(0xFF555555),
+                              fontSize: 10,
+                              fontStyle: FontStyle.italic)),
+                    ],
+                  ),
+                ),
+                if (onTap != null)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 2),
+                    child: Icon(Icons.chevron_right,
+                        color: Color(0xFF555555), size: 20),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  void _showPlatformReportSheet(BuildContext context, PlatformReport report) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFF1C1C1C),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.75,
+          maxChildSize: 0.95,
+          minChildSize: 0.5,
+          expand: false,
+          builder: (context, scrollController) {
+            return SingleChildScrollView(
+              controller: scrollController,
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Drag handle
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF555555),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+
+                  // Header row: flag icon + title
+                  Row(children: [
+                    const Icon(Icons.flag, color: Color(0xFFF59E0B), size: 20),
+                    const SizedBox(width: 10),
+                    Text('Platform Report',
+                        style: GoogleFonts.outfit(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold)),
+                  ]),
+                  const SizedBox(height: 4),
+                  Text('Auto-generated by Executor Agent',
+                      style: GoogleFonts.inter(
+                          color: const Color(0xFF8E8E8E), fontSize: 12)),
+                  const Divider(height: 28, color: Color(0xFF2A2A2A)),
+
+                  // Metadata chips row
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      _reportChip('Platform', report.platform,
+                          const Color(0xFFF59E0B)),
+                      _reportChip(
+                          'Type', report.reportType, const Color(0xFF8E8E8E)),
+                      _reportChip('Harm', report.harmCategory,
+                          const Color(0xFFFF4444)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Evidence Summary
+                  _reportSection(
+                      'Evidence Summary', report.evidenceSummary, Icons.search),
+                  const SizedBox(height: 16),
+
+                  // Recommended Action
+                  _reportSection('Recommended Action',
+                      report.recommendedAction, Icons.gavel),
+                  const SizedBox(height: 16),
+
+                  // Full Report Body
+                  Text('Full Report',
+                      style: GoogleFonts.inter(
+                          color: const Color(0xFF8E8E8E),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 8),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0A0A0A),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF2A2A2A)),
+                    ),
+                    child: Text(
+                      report.reportBody,
+                      style: GoogleFonts.inter(
+                          color: const Color(0xFFE5E5E5),
+                          fontSize: 13,
+                          height: 1.7),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Drafted by footer
+                  Center(
+                    child: Text(
+                      'Drafted by FakeNews Killer Automated Detection System',
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.inter(
+                          color: const Color(0xFF555555), fontSize: 11),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _reportChip(String label, String value, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: RichText(
+        text: TextSpan(children: [
+          TextSpan(
+              text: '$label: ',
+              style: GoogleFonts.inter(
+                  color: const Color(0xFF8E8E8E), fontSize: 11)),
+          TextSpan(
+              text: value,
+              style: GoogleFonts.inter(
+                  color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _reportSection(String title, String content, IconData icon) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(children: [
+          Icon(icon, size: 14, color: const Color(0xFF8E8E8E)),
+          const SizedBox(width: 6),
+          Text(title,
+              style: GoogleFonts.inter(
+                  color: const Color(0xFF8E8E8E),
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600)),
+        ]),
+        const SizedBox(height: 6),
+        Text(content,
+            style: GoogleFonts.inter(
+                color: Colors.white, fontSize: 14, height: 1.6)),
+      ],
     );
   }
 }

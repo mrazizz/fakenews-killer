@@ -4,6 +4,7 @@ class TrackerEntry {
   final String claimPreview;
   final String spreadRisk;
   final String date;
+  final int confidenceScore;
 
   TrackerEntry({
     required this.id,
@@ -11,6 +12,7 @@ class TrackerEntry {
     required this.claimPreview,
     required this.spreadRisk,
     required this.date,
+    required this.confidenceScore,
   });
 
   factory TrackerEntry.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class TrackerEntry {
       claimPreview: preview,
       spreadRisk: json['spread_risk'] ?? 'UNKNOWN',
       date: json['first_detected'] ?? '',
+      confidenceScore: json['confidence_score'] ?? 0,
     );
   }
 }

@@ -23,11 +23,19 @@ class _LoadingScreenState extends State<LoadingScreen>
 
   final List<String> _agentNames = ['reader', 'analyst', 'strategist', 'executor'];
   final List<String> _steps = [
-    "Reader Agent \u2014 Extracting claims...",
-    "Analyst Agent \u2014 Checking sources...",
-    "Strategist Agent \u2014 Planning response...",
-    "Executor Agent \u2014 Simulating actions...",
+    "Reading text & extracting claims...",
+    "Analyzing & checking sources...",
+    "Planning response strategy...",
+    "Finalizing verdict...",
   ];
+
+  String _getCurrentStepText() {
+    for (int i = _stepStates.length - 1; i >= 0; i--) {
+      if (_stepStates[i] == 1) return _steps[i];
+    }
+    if (_stepStates.last == 2) return "Analysis complete.";
+    return "Initializing...";
+  }
 
   late final AnimationController _pulseController;
   late final Animation<double> _pulseAnimation;
@@ -113,9 +121,11 @@ class _LoadingScreenState extends State<LoadingScreen>
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: SizedBox(
+            width: double.infinity,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               AnimatedBuilder(
                 animation: _pulseAnimation,
@@ -154,20 +164,22 @@ class _LoadingScreenState extends State<LoadingScreen>
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 48),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0A0A0A),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF2A2A2A)),
-                ),
-                child: Column(
-                  children: [
-                    for (int i = 0; i < _steps.length; i++)
-                      _buildAgentCard(i, _steps[i]),
-                  ],
+              const SizedBox(height: 64),
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
+                strokeWidth: 3,
+              ),
+              const SizedBox(height: 24),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: Text(
+                  _getCurrentStepText(),
+                  key: ValueKey(_getCurrentStepText()),
+                  style: GoogleFonts.robotoMono(
+                    color: const Color(0xFF8E8E8E),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ),
               if (_hasError) ...[
@@ -182,64 +194,11 @@ class _LoadingScreenState extends State<LoadingScreen>
               ],
             ],
           ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildAgentCard(int index, String title) {
-    final state = _stepStates[index];
-    final isComplete = state == 2;
-    final isActive = state == 1;
-    final isWaiting = state == 0;
 
-    return AnimatedOpacity(
-      duration: const Duration(milliseconds: 400),
-      opacity: isWaiting ? 0.3 : 1.0,
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 14),
-        child: Row(
-          children: [
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: isComplete
-                  ? const Icon(Icons.check_circle,
-                      key: ValueKey('check'),
-                      color: Color(0xFF22C55E),
-                      size: 20)
-                  : isActive
-                      ? const SizedBox(
-                          key: ValueKey('spinner'),
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Color(0xFFE5E5E5),
-                            ),
-                          ),
-                        )
-                      : const Icon(Icons.chevron_right,
-                          key: ValueKey('wait'),
-                          color: Colors.white24,
-                          size: 20),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: GoogleFonts.robotoMono(
-                  color: isComplete
-                      ? const Color(0xFF22C55E)
-                      : const Color(0xFF8E8E8E),
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

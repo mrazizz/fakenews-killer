@@ -64,27 +64,7 @@ class ResultsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 10),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TrackerScreen()),
-                  ),
-                  icon: const Icon(Icons.list_alt, color: Color(0xFFE5E5E5)),
-                  label: const Text('View Tracker',
-                      style: TextStyle(
-                          color: Color(0xFFE5E5E5), fontWeight: FontWeight.bold)),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: const BorderSide(color: Color(0xFF2A2A2A)),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
-              ),
+
               const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
@@ -126,12 +106,15 @@ class ResultsScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Text(
-                    result.verdict.toUpperCase(),
-                    style: GoogleFonts.outfit(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: verdictColor,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      result.verdict.toUpperCase(),
+                      style: GoogleFonts.outfit(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: verdictColor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),

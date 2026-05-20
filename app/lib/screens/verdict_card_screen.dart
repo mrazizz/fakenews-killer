@@ -175,13 +175,16 @@ class _VerdictCardScreenState extends State<VerdictCardScreen> {
 
                         // Verdict
                         Center(
-                          child: Text(
-                            widget.result.verdict.toUpperCase(),
-                            style: GoogleFonts.outfit(
-                              fontSize: 52,
-                              color: verdictColor,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 2,
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              widget.result.verdict.toUpperCase(),
+                              style: GoogleFonts.outfit(
+                                fontSize: 52,
+                                color: verdictColor,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: 2,
+                              ),
                             ),
                           ),
                         ),

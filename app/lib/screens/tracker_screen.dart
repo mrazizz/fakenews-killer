@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import '../models/tracker_entry.dart';
 import '../models/analysis_result.dart';
 import '../services/api_service.dart';
 import '../widgets/app_scaffold.dart';
 import 'verdict_card_screen.dart';
+import 'results_screen.dart';
 
 class TrackerScreen extends StatefulWidget {
   const TrackerScreen({super.key});
@@ -49,16 +51,25 @@ class _TrackerScreenState extends State<TrackerScreen> {
     }
   }
 
+  String _formatDate(String isoString) {
+    try {
+      final date = DateTime.parse(isoString).toLocal();
+      return DateFormat('MMM dd, yyyy • hh:mm a').format(date);
+    } catch (e) {
+      return isoString;
+    }
+  }
+
   void _onEntryTap(TrackerEntry entry) {
     final result = AnalysisResult(
       verdict: entry.verdict,
-      confidenceScore: 0,
+      confidenceScore: entry.confidenceScore,
       keyFinding: entry.claimPreview,
       claimsBreakdown: [
         ClaimBreakdown(
           claim: entry.claimPreview,
           status: entry.verdict,
-          explanation: '',
+          explanation: 'Retrieved from tracker database.',
         ),
       ],
       sourcesAnalyzed: [],
@@ -68,7 +79,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => VerdictCardScreen(result: result),
+        builder: (context) => ResultsScreen(result: result),
       ),
     );
   }
@@ -214,7 +225,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
                                     ),
                                   ),
                                   Text(
-                                    entry.date,
+                                    _formatDate(entry.date),
                                     style: const TextStyle(
                                       color: Color(0xFF555555),
                                       fontSize: 12,
