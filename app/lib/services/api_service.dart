@@ -6,15 +6,15 @@ import '../models/analysis_result.dart';
 import '../models/tracker_entry.dart';
 
 class ApiService {
-  static String get baseUrl {
-    if (kIsWeb) {
-      return 'http://localhost:8000';
-    }
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:8000';
-    }
-    return 'http://localhost:8000';
-  }
+  // ── Production (Cloud Run) ──
+  static const String baseUrl = 'https://fakenews-killer-api-966169006664.us-central1.run.app';
+
+  // ── Local development (uncomment to use instead) ──
+  // static String get baseUrl {
+  //   if (kIsWeb) return 'http://localhost:8000';
+  //   if (defaultTargetPlatform == TargetPlatform.android) return 'http://10.0.2.2:8000';
+  //   return 'http://localhost:8000';
+  // }
 
   /// Original non-streaming analyze endpoint (kept for fallback).
   Future<AnalysisResult> analyzeText(String text) async {
